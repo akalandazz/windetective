@@ -20,7 +20,7 @@ app.add_middleware(
 )
 
 
-@app.post("/api/generate-report", response_model=ReportResponse)
+@app.post("/api/generate-report", response_model=ReportResponse, tags=["report"])
 def generate_car_report(request: ReportRequest):
 
     # --- 1. Validate VIN ---
@@ -46,7 +46,7 @@ def generate_car_report(request: ReportRequest):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.get("/health")
+@app.get("/health", tags=["maintenance"])
 def health_check():
     return {"status": "healthy"}
 
