@@ -1,9 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from services.vin_validator import validate_vin
-from services.report_generator import generate_report
-from models import ReportRequest, ReportResponse
+from routers.report_router import router as report_router
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -19,32 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.post("/api/generate-report", response_model=ReportResponse, tags=["report"])
-def generate_car_report(request: ReportRequest):
-
-    # --- 1. Validate VIN ---
-    if not validate_vin(request.vin):
-        raise HTTPException(status_code=400, detail="Invalid VIN format")
-
-    try:
-        # --- 2. Generate report ---
-        report = generate_report(request.vin)
-
-        # Ensure correct return type
-        if isinstance(report, dict):
-            return ReportResponse(**report)
-
-        return report
-
-    except HTTPException:
-        # Allow FastAPI errors to pass through untouched
-        raise
-
-    except Exception as e:
-        logger.exception("Unexpected error generating report")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
+app.include_router(report_router, prefix="/api/v1/reports", tags=["report"])
 
 @app.get("/health", tags=["maintenance"])
 def health_check():
