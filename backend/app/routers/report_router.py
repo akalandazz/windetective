@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from services.vin_validator import validate_vin
 from services.report_generator import generate_report
+from resources.mocks import generate_mock_report
 from models import ReportRequest, ReportResponse
+from settings import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,7 +19,10 @@ def generate_car_report(request: ReportRequest):
 
     try:
         # --- 2. Generate report ---
-        report = generate_report(request.vin)
+        if settings.ai_mock_response:
+            report = generate_mock_report(request.vin)
+        else:
+            report = generate_report(request.vin)
 
         # Ensure correct return type
         if isinstance(report, dict):

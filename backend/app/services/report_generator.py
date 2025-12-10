@@ -1,14 +1,14 @@
 from openai import OpenAI
 from models import ReportResponse
 from services.data_aggregator import aggregate_car_data
+from settings import settings
 from datetime import datetime
-import os
 import logging
 import json
 
 logger = logging.getLogger(__name__)
 
-client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
+client = OpenAI(api_key=settings.deepseek_api_key, base_url=settings.ai_base_url)
 
 def generate_report(vin: str) -> ReportResponse:
     # Aggregate data from providers
@@ -105,9 +105,9 @@ def generate_report(vin: str) -> ReportResponse:
 
     try:
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model=settings.ai_model,
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=2000,
+            max_tokens=settings.ai_max_tokens,
             stream=False
         )
         report_json_str = response.choices[0].message.content.strip()
