@@ -4,12 +4,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from models import AggregatedData, ProviderData
 from providers.carfax import fetch_carfax_data
 from providers.clearwin import fetch_clearwin_data
+from providers.nhtsa import fetch_nhtsa_data
 
 logger = logging.getLogger(__name__)
 
 def aggregate_car_data(vin: str) -> AggregatedData:
     """
-    Aggregate vehicle data from multiple providers (Carfax and ClearWin) in parallel.
+    Aggregate vehicle data from multiple providers (Carfax, ClearWin, and NHTSA) in parallel.
     """
     providers_data = []
     aggregated_at = datetime.utcnow()
@@ -35,7 +36,8 @@ def aggregate_car_data(vin: str) -> AggregatedData:
     with ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(fetch_provider, "Carfax", fetch_carfax_data),
-            executor.submit(fetch_provider, "ClearWin", fetch_clearwin_data)
+            executor.submit(fetch_provider, "ClearWin", fetch_clearwin_data),
+            executor.submit(fetch_provider, "NHTSA", fetch_nhtsa_data)
         ]
         for future in as_completed(futures):
             providers_data.append(future.result())
