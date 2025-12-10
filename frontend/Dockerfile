@@ -1,5 +1,5 @@
 # Build stage
-FROM node:25-alpine as build
+FROM node:25-alpine AS build
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Copy built app to nginx
+# Next.js static export outputs to 'out' directory
 COPY --from=build /app/out /usr/share/nginx/html
 
 # Copy nginx config
