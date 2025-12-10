@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { VinInputProps } from '@/lib/types';
-import { buildClassName } from '@/lib/design-system';
-import Button from './ui/button';
-import Input from './ui/input';
+import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 // VIN validation regex - 17 characters, no I, O, Q
 const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/;
@@ -62,7 +62,7 @@ const VinInput: React.FC<VinInputProps> = ({
   const displayError = error || validationError || undefined;
 
   return (
-    <div className={buildClassName('w-full max-w-md mx-auto', className)}>
+    <div className={cn('w-full max-w-md mx-auto', className)}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label 
@@ -75,9 +75,8 @@ const VinInput: React.FC<VinInputProps> = ({
           <Input
             id="vin-input"
             value={vin}
-            onChange={handleInputChange}
+            onChange={(e) => handleInputChange(e.target.value)}
             placeholder={placeholder}
-            error={displayError}
             disabled={isLoading}
             maxLength={17}
             className="vin-input text-center text-lg font-mono tracking-wider"
@@ -89,8 +88,8 @@ const VinInput: React.FC<VinInputProps> = ({
           
           {/* Character counter */}
           <div className="mt-1 text-right">
-            <span 
-              className={buildClassName(
+            <span
+              className={cn(
                 'text-sm',
                 vin.length === 17 ? 'text-success-600' : 'text-neutral-500'
               )}
@@ -132,12 +131,10 @@ const VinInput: React.FC<VinInputProps> = ({
         
         <Button
           type="submit"
-          variant="primary"
+          variant="default"
           size="lg"
-          fullWidth
           disabled={!isValid || isLoading}
-          loading={isLoading}
-          className="mt-6"
+          className="mt-6 w-full"
           aria-describedby="submit-button-help"
         >
           {isLoading ? 'Generating Report...' : 'Generate Report'}

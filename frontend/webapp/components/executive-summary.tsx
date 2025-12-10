@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import type { ExecutiveSummaryProps } from '@/lib/types';
-import { buildClassName, buildConditionClassName } from '@/lib/design-system';
-import StatusBadge from './ui/status-badge';
-import Button from './ui/button';
+import { cn } from '@/lib/utils';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 
 const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
   summary,
@@ -104,7 +104,7 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
   };
 
   return (
-    <div className={buildClassName('card bg-gradient-to-br from-white to-neutral-50 border-2', className)}>
+    <div className={cn('card bg-gradient-to-br from-white to-neutral-50 border-2', className)}>
       {/* Header */}
       <div className="p-6 border-b border-neutral-200">
         <div className="flex items-center justify-between mb-4">
@@ -121,12 +121,12 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
           </div>
           
           <div className="text-right">
-            <div className={buildClassName('text-sm font-medium mb-1', getConfidenceColor(summary.confidence))}>
+            <div className={cn('text-sm font-medium mb-1', getConfidenceColor(summary.confidence))}>
               {Math.round(summary.confidence * 100)}% Confidence
             </div>
             <div className="w-20 h-2 bg-neutral-200 rounded-full">
               <div 
-                className={buildClassName(
+                className={cn(
                   'h-full rounded-full transition-all duration-300',
                   summary.confidence >= 0.8 ? 'bg-success-500' :
                   summary.confidence >= 0.6 ? 'bg-warning-500' : 'bg-error-500'
@@ -141,7 +141,7 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Overall Condition */}
           <div className="text-center">
-            <div className={buildClassName(
+            <div className={cn(
               'text-2xl font-bold mb-1 capitalize',
               getConditionColor(summary.overallCondition)
             )}>
@@ -153,7 +153,9 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
           {/* Risk Level */}
           <div className="text-center">
             <div className="mb-2">
-              <StatusBadge status={getRiskStatus(summary.riskLevel)} size="md" />
+              <Badge variant={getRiskStatus(summary.riskLevel) === 'clean' ? 'default' : getRiskStatus(summary.riskLevel) === 'critical' ? 'destructive' : 'secondary'}>
+                {summary.riskLevel.charAt(0).toUpperCase() + summary.riskLevel.slice(1)}
+              </Badge>
             </div>
             <div className="text-sm text-neutral-600">Risk Level</div>
           </div>
@@ -179,7 +181,7 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
       </div>
 
       {/* Recommendation Banner */}
-      <div className={buildClassName(
+      <div className={cn(
         'p-4 border-l-4 m-6 rounded-lg border',
         getRecommendationColor(summary.recommendedAction)
       )}>
@@ -225,16 +227,14 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
               onClick={() => setIsExpanded(!isExpanded)}
               variant="ghost"
               size="sm"
-              icon={
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d={
-                    isExpanded 
-                      ? "M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                      : "M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  } clipRule="evenodd" />
-                </svg>
-              }
             >
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d={
+                  isExpanded
+                    ? "M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                    : "M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                } clipRule="evenodd" />
+              </svg>
               {isExpanded ? 'Show Less' : `Show ${summary.keyFindings.length - 3} More`}
             </Button>
           </div>
@@ -244,16 +244,13 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             onClick={onViewDetails}
-            variant="primary"
+            variant="default"
             size="lg"
-            fullWidth
             className="flex-1"
-            icon={
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-              </svg>
-            }
           >
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
             View Detailed Report
           </Button>
           
@@ -262,12 +259,10 @@ const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
             variant="outline"
             size="lg"
             className="sm:w-auto"
-            icon={
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
-              </svg>
-            }
           >
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
+            </svg>
             Print Summary
           </Button>
         </div>

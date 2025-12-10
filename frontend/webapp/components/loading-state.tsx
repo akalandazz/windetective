@@ -1,7 +1,7 @@
 import React from 'react';
 import type { LoadingStateProps } from '@/lib/types';
-import { buildClassName } from '@/lib/design-system';
-import Button from './ui/button';
+import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
 
 const LoadingState: React.FC<LoadingStateProps> = ({
   state,
@@ -102,7 +102,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({
   };
 
   return (
-    <div className={buildClassName('w-full max-w-2xl mx-auto', className)}>
+    <div className={cn('w-full max-w-2xl mx-auto', className)}>
       {/* Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
@@ -148,9 +148,9 @@ const LoadingState: React.FC<LoadingStateProps> = ({
         {currentSteps.map((step, index) => (
           <div
             key={step.id}
-            className={buildClassName(
+            className={cn(
               'flex items-start gap-4 p-4 rounded-lg transition-all duration-300',
-              step.status === 'active' ? 'bg-primary-50 border border-primary-200' : 
+              step.status === 'active' ? 'bg-primary-50 border border-primary-200' :
               step.status === 'completed' ? 'bg-success-50 border border-success-200' :
               step.status === 'error' ? 'bg-error-50 border border-error-200' : 'bg-neutral-50'
             )}
@@ -163,7 +163,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({
             {/* Step Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className={buildClassName(
+                <h3 className={cn(
                   'font-semibold text-sm',
                   step.status === 'completed' ? 'text-success-800' :
                   step.status === 'active' ? 'text-primary-800' :
@@ -181,7 +181,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({
                 )}
               </div>
               
-              <p className={buildClassName(
+              <p className={cn(
                 'text-sm',
                 step.status === 'completed' ? 'text-success-700' :
                 step.status === 'active' ? 'text-primary-700' :
@@ -241,7 +241,6 @@ const LoadingState: React.FC<LoadingStateProps> = ({
           <Button
             onClick={onCancel}
             variant="outline"
-            size="md"
             className="px-6"
           >
             Cancel
@@ -250,7 +249,6 @@ const LoadingState: React.FC<LoadingStateProps> = ({
         
         <Button
           variant="ghost"
-          size="md"
           className="px-6"
           disabled
         >

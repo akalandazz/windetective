@@ -1,7 +1,8 @@
-// UI Components Export
-export { default as Button } from './button';
-export { default as Input } from './input';
-export { default as StatusBadge } from './status-badge';
+// UI Components Export - shadcn/ui components
+export { Button } from './button';
+export { Input } from './input';
+export { Badge } from './badge';
 
 // Re-export types for convenience
-export type { ButtonProps, InputProps, StatusBadgeProps } from '@/lib/types';
+export type { ButtonProps } from './button';
+export type { BadgeProps } from './badge';
