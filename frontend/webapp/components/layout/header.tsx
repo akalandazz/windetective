@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { buildClassName } from '@/lib/design-system';
 import Container from './container';
 
@@ -7,6 +7,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ className = '' }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <header className={buildClassName('bg-white border-b border-neutral-200 sticky top-0 z-30', className)}>
       <Container>
@@ -65,18 +66,58 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             </button>
 
             {/* Mobile menu button */}
-            <button 
+            <button
               className="md:hidden p-2 text-neutral-500 hover:text-primary-600 transition-colors duration-200"
-              aria-label="Open menu"
-              title="Open menu"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              title={isMenuOpen ? "Close menu" : "Open menu"}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-              </svg>
+              {isMenuOpen ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
       </Container>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white border-t border-neutral-200">
+          <Container>
+            <nav className="py-4">
+              <div className="flex flex-col space-y-4">
+                <a
+                  href="#features"
+                  className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Features
+                </a>
+                <a
+                  href="#pricing"
+                  className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Pricing
+                </a>
+                <a
+                  href="#about"
+                  className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  About
+                </a>
+              </div>
+            </nav>
+          </Container>
+        </div>
+      )}
     </header>
   );
 };
