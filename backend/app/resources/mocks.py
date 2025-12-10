@@ -1,5 +1,6 @@
 from models import AggregatedData, ProviderData, ReportResponse
 from datetime import datetime
+import json
 
 
 AI_RESPONSE_MOCK = """
@@ -96,7 +97,7 @@ def generate_mock_report(vin: str) -> ReportResponse:
         )
     return ReportResponse(
         vin=vin,
-        report_data=AI_RESPONSE_MOCK,
+        report_data=json.loads(AI_RESPONSE_MOCK),
         generated_at=aggregated_at,
         providers_used=[p.provider_name for p in aggregated_data.providers if p.status == "success"],
         confidence_score=10

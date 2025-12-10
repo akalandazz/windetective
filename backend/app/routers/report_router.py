@@ -24,6 +24,9 @@ def generate_car_report(request: ReportRequest):
         else:
             report = generate_report(request.vin)
 
+        
+        report = report.model_dump()
+
         # Ensure correct return type
         if isinstance(report, dict):
             return ReportResponse(**report)
