@@ -4,6 +4,7 @@ from services.data_aggregator import aggregate_car_data
 from datetime import datetime
 import os
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -29,21 +30,77 @@ def generate_report(vin: str) -> ReportResponse:
 
     # AI prompt
     prompt = f"""
-    Generate a detailed HTML report for vehicle VIN: {vin}
+    Generate a detailed JSON report for vehicle VIN: {vin}
 
     Data from providers:
     {data_summary}
 
-    Create an HTML report that includes:
-    - Vehicle identification information
-    - Accident and damage history
-    - Ownership history
-    - Title and registration status
-    - Any potential issues or red flags
-    - Overall assessment and recommendations
+    Create a JSON object with the following structure:
+    {{
+        "vehicle_identification": {{
+            "vin": "{vin}",
+            "make": "string",
+            "model": "string",
+            "year": number,
+            "engine": "string",
+            "transmission": "string"
+        }},
+        "accident_history": {{
+            "total_accidents": number,
+            "severity": "none|minor|moderate|severe",
+            "structural_damage": boolean,
+            "flood_damage": boolean,
+            "accidents": [array of accident objects with date, severity, description]
+        }},
+        "ownership_history": {{
+            "total_owners": number,
+            "average_ownership_duration_months": number,
+            "commercial_use": boolean,
+            "rental_history": boolean,
+            "owners": [array of owner objects with duration, location]
+        }},
+        "title_status": {{
+            "status": "clean|salvage|rebuilt|flood|lemon",
+            "issues": [array of strings],
+            "state_issued": "string"
+        }},
+        "recalls": {{
+            "total_recalls": number,
+            "open_recalls": number,
+            "safety_recalls": number,
+            "recall_list": [array of recall objects with number, date, component, description, status]
+        }},
+        "maintenance": {{
+            "regular_maintenance": boolean,
+            "total_services": number,
+            "overdue_services": [array of strings],
+            "last_service": {{
+                "date": "string",
+                "mileage": number,
+                "type": "string"
+            }}
+        }},
+        "insurance_claims": {{
+            "total_claims": number,
+            "claims_severity": "low|medium|high",
+            "claims": [array of claim objects with date, type, amount, description]
+        }},
+        "overall_assessment": {{
+            "condition": "excellent|good|fair|poor",
+            "risk_level": "low|medium|high",
+            "recommended_action": "buy|negotiate|inspect|avoid",
+            "key_findings": [array of strings],
+            "estimated_value": {{
+                "min": number,
+                "max": number,
+                "currency": "USD"
+            }},
+            "confidence": number
+        }}
+    }}
 
-    Format as clean HTML with sections, headings, and bullet points.
-    Highlight any concerning findings in red.
+    Fill in the actual data based on the provider information. Use reasonable defaults where data is unavailable.
+    Return only valid JSON, no additional text.
     """
 
     try:
@@ -53,14 +110,26 @@ def generate_report(vin: str) -> ReportResponse:
             max_tokens=2000,
             stream=False
         )
-        report_html = response.choices[0].message.content.strip()
+        report_json_str = response.choices[0].message.content.strip()
+        logger.info(f"AI response: {report_json_str[:500]}...")  # Log first 500 chars
+        report_data = json.loads(report_json_str)
+        logger.info("JSON parsing successful")
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON parsing failed: {e}")
+        logger.error(f"Raw response: {report_json_str}")
+        report_data = {
+            "error": "Failed to parse AI response as JSON",
+            "raw_response": report_json_str
+        }
     except Exception as e:
         logger.error(f"AI generation failed: {e}")
-        report_html = f"<h1>Report for VIN {vin}</h1><p>Unable to generate AI report due to error.</p>"
+        report_data = {
+            "error": f"Unable to generate AI report due to error: {str(e)}"
+        }
 
     return ReportResponse(
         vin=vin,
-        report_html=report_html,
+        report_data=report_data,
         generated_at=datetime.utcnow(),
         providers_used=[p.provider_name for p in aggregated_data.providers if p.status == "success"],
         confidence_score=confidence_score

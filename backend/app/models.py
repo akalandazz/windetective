@@ -18,7 +18,7 @@ class AggregatedData(BaseModel):
 
 class ReportResponse(BaseModel):
     vin: str
-    report_html: str
+    report_data: Dict[str, Any]
     generated_at: datetime
     providers_used: List[str]
     confidence_score: float  # 0-1, how complete the data is
