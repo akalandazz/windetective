@@ -53,13 +53,24 @@ export interface ReportSection {
   lastUpdated?: Date;
 }
 
-export type SectionData = 
+export type SectionData =
+  | VehicleData
   | MaintenanceData
   | AccidentData
   | OwnershipData
   | RecallData
   | TitleData
   | InsuranceData;
+
+export interface VehicleData {
+  type: 'vehicle';
+  vin: string;
+  make: string;
+  model: string;
+  year: number;
+  engine: string;
+  transmission: string;
+}
 
 export interface MaintenanceData {
   type: 'maintenance';
