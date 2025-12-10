@@ -31,12 +31,18 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
+    // Merge headers properly
+    const headers = new Headers(this.defaultHeaders);
+    if (options.headers) {
+      const optionHeaders = new Headers(options.headers);
+      optionHeaders.forEach((value, key) => {
+        headers.set(key, value);
+      });
+    }
+    
     const config: RequestInit = {
-      headers: {
-        ...this.defaultHeaders,
-        ...options.headers,
-      },
       ...options,
+      headers: headers,
     };
 
     try {
@@ -116,13 +122,7 @@ class ApiClient {
 
   // VIN Report endpoints
   async generateReport(vinData: VinReportRequest): Promise<BackendReportResponse> {
-    return this.request<BackendReportResponse>('/api/v1/reports/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `vin=${encodeURIComponent(vinData.vin)}`,
-    });
+    return this.post<BackendReportResponse>('/api/v1/reports/generate', vinData);
   }
 
   // Utility method to check if API is available
