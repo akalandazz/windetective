@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { buildClassName } from '@/lib/design-system';
 import Container from './container';
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from '@/components/ui/navigation-menu';
 
 interface HeaderProps {
   className?: string;
@@ -31,26 +32,31 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <a 
-              href="#features" 
-              className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
-            >
-              Features
-            </a>
-            <a 
-              href="#pricing" 
-              className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
-            >
-              Pricing
-            </a>
-            <a 
-              href="#about" 
-              className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
-            >
-              About
-            </a>
-          </nav>
+          <NavigationMenu className="hidden md:flex items-center gap-6">
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <a href="#features" className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium">
+                    Features
+                  </a>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <a href="#pricing" className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium">
+                    Pricing
+                  </a>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <a href="#about" className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium">
+                    About
+                  </a>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
 
           {/* Actions */}
           <div className="flex items-center gap-3">
