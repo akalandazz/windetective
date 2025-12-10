@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 from models import ReportResponse
 from services.data_aggregator import aggregate_car_data
 from datetime import datetime
@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
 
 def generate_report(vin: str) -> ReportResponse:
     # Aggregate data from providers
@@ -47,11 +47,11 @@ def generate_report(vin: str) -> ReportResponse:
     """
 
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=2000,
-            temperature=0.3
+            stream=False
         )
         report_html = response.choices[0].message.content.strip()
     except Exception as e:
