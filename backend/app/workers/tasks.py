@@ -6,7 +6,6 @@ from settings import settings
 from models import ReportTaskResult, ReportResponse
 from enums import TaskStatus
 from exceptions import CeleryTaskNotFound
-import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,13 +19,14 @@ def get_celery_task_result(task_id: str):
         task_id: The ID of the Celery task
           
     Returns:
-        AsyncResult: The task result
+        ReportTaskResult: The task result
     """
-
     result = AsyncResult(task_id, app=celeryapp)
 
-    # Check if the task ID is not found
-    if result.id is None:
+    # Check if the task exists in the backend
+    # A PENDING state with no info usually means the task doesn't exist
+    if result.state == "PENDING" and result.info is None:
+        # Optionally verify the task was never registered
         raise CeleryTaskNotFound(f"Task ID '{task_id}' not found")
 
     if result.state == "PENDING":
@@ -36,7 +36,14 @@ def get_celery_task_result(task_id: str):
         )
 
     elif result.state == "SUCCESS":
-        return ReportTaskResult.model_validate(result.get())
+        # Get the raw result dict and reconstruct the Pydantic model
+        raw_result = result.get()
+        report = ReportResponse.model_validate(raw_result)
+        return ReportTaskResult(
+            message=f"Task '{task_id}' completed successfully",
+            status=TaskStatus.COMPLETED,
+            result=report
+        )
       
     elif result.state == "FAILURE":
         exc_info = result.result if result.result else "No info"
@@ -47,7 +54,7 @@ def get_celery_task_result(task_id: str):
       
     else:
         return ReportTaskResult(
-            message=f"[Task '{task_id}' is in progress (state: {result.state})",
+            message=f"Task '{task_id}' is in progress (state: {result.state})",
             status=TaskStatus.IN_PROGRESS
         )
 
@@ -60,10 +67,5 @@ def generate_car_report_task(vin: str):
         
     logger.info(f"Report content: {report}")
     
-    task_result = ReportTaskResult(
-        message = "Report Finished",
-        status = TaskStatus.COMPLETED,
-        result = report
-    )
-    
-    return task_result.model_dump(mode="json")
+    # Serialize the Pydantic model to a JSON-compatible dict
+    return report.model_dump(mode="json")
