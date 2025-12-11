@@ -3,9 +3,10 @@ from workers.celeryapp import celeryapp
 from services.report_generator import generate_report
 from resources.mocks import generate_mock_report
 from settings import settings
-from models import ReportTaskResult
+from models import ReportTaskResult, ReportResponse
 from enums import TaskStatus
 from exceptions import CeleryTaskNotFound
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -35,11 +36,7 @@ def get_celery_task_result(task_id: str):
         )
 
     elif result.state == "SUCCESS":
-        return ReportTaskResult(
-            message=f"Task '{task_id}' completed successfully",
-            status=TaskStatus.COMPLETED,
-            result=result.get()
-        )
+        return ReportTaskResult.model_validate(result.get())
       
     elif result.state == "FAILURE":
         exc_info = result.result if result.result else "No info"
