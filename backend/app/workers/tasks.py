@@ -26,68 +26,47 @@ def get_celery_task_result(task_id: str):
 
     # Check if the task ID is not found
     if result.id is None:
-        raise CeleryTaskNotFound("Task ID not found")
+        raise CeleryTaskNotFound(f"Task ID '{task_id}' not found")
 
     if result.state == "PENDING":
         return ReportTaskResult(
-            message="Task is pending",
-            status=TaskStatus.PENDING,
-            result=None
-        )
-      
-    elif result.state == "STARTED":
-        return ReportTaskResult(
-            message="Task started",
-            status=TaskStatus.STARTED,
-            result=None
-        )
-  
-    elif result.state == "RETRY":
-        return ReportTaskResult(
-            message="Task is retrying",
-            status=TaskStatus.IN_PROGRESS,
-            result=None
+            message=f"Task '{task_id}' is pending in the queue",
+            status=TaskStatus.PENDING
         )
 
     elif result.state == "SUCCESS":
         return ReportTaskResult(
-            message="Task completed successfully",
+            message=f"Task '{task_id}' completed successfully",
             status=TaskStatus.COMPLETED,
             result=result.get()
         )
       
     elif result.state == "FAILURE":
+        exc_info = result.result if result.result else "No info"
         return ReportTaskResult(
-            message="Task failed",
-            status=TaskStatus.FAILED,
-            result=None
+            message=f"Task '{task_id}' failed: {exc_info}",
+            status=TaskStatus.FAILED
         )
       
     else:
         return ReportTaskResult(
-            message="Task is in progress",
-            status=TaskStatus.IN_PROGRESS,
-            result=None
+            message=f"[Task '{task_id}' is in progress (state: {result.state})",
+            status=TaskStatus.IN_PROGRESS
         )
 
 @celeryapp.task
 def generate_car_report_task(vin: str):
-    try:
-        # Generate report
-        if settings.ai_mock_response:
-            report = generate_mock_report(vin)
-        else:
-            report = generate_report(vin)
-
-        return ReportTaskResult(
-            message = "Report Generation Started",
-            status = TaskStatus.COMPLETED,
-            result = report
-        )
-
-    except Exception as e:
-        logger.exception("Unexpected error generating report")
-        return ReportTaskResult(
-            message = "Task submit failed.",
-            status = TaskStatus.FAILED
-        )
+    if settings.ai_mock_response:
+        report = generate_mock_report(vin)
+    else:
+        report = generate_report(vin)
+        
+    logger.info(f"Report content: {report}")
+    
+    task_result = ReportTaskResult(
+        message = "Report Finished",
+        status = TaskStatus.COMPLETED,
+        result = report
+    )
+    
+    return task_result.model_dump(mode="json")
