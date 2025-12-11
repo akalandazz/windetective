@@ -1,7 +1,6 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings
 from typing import List, Optional
-import os
 
 
 class Settings(BaseSettings):
@@ -34,6 +33,10 @@ class Settings(BaseSettings):
 
     # Logging
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
+
+    # Celery settings
+    celery_broker_url: str = Field(default="redis://localhost:6379/0", env="CELERY_BROKER_URL")
+    celery_result_backend: str = Field(default="redis://localhost:6379/0", env="CELERY_RESULT_BACKEND")
 
     class Config:
         env_file = ".env"
