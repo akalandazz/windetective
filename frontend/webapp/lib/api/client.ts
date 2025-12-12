@@ -1,4 +1,9 @@
-import type { VinReportRequest, BackendReportResponse, ApiResponse } from '@/lib/types';
+import type {
+  BackendReportResponse,
+  CeleryTask,
+  ReportTaskResult,
+  PollingOptions
+} from '@/lib/types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -96,43 +101,46 @@ class ApiClient {
     });
   }
 
-  async put<T>(
-    endpoint: string,
-    data?: unknown,
-    headers?: Record<string, string>
-  ): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
+  // Celery Task endpoints for asynchronous report generation
+  async startReportTask(vin: string): Promise<CeleryTask> {
+    return this.post<CeleryTask>('/api/v1/reports/generate', { vin });
   }
 
-  async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'DELETE',
-      headers,
-    });
+  async getTaskResult(taskId: string): Promise<ReportTaskResult> {
+    return this.get<ReportTaskResult>(`/api/v1/reports/result/${taskId}`);
   }
 
-  // Health check endpoint
-  async healthCheck(): Promise<{ status: string }> {
-    return this.get<{ status: string }>('/health');
-  }
-
-  // VIN Report endpoints
-  async generateReport(vinData: VinReportRequest): Promise<BackendReportResponse> {
-    return this.post<BackendReportResponse>('/api/v1/reports/generate', vinData);
-  }
-
-  // Utility method to check if API is available
-  async isApiAvailable(): Promise<boolean> {
-    try {
-      await this.healthCheck();
-      return true;
-    } catch {
-      return false;
+  async pollTaskResult(
+    taskId: string,
+    options: PollingOptions = { interval: 2000, timeout: 60000 }
+  ): Promise<BackendReportResponse> {
+    const { interval = 2000, timeout = 60000 } = options;
+    const startTime = Date.now();
+   
+    while (Date.now() - startTime < timeout) {
+      const result = await this.getTaskResult(taskId);
+      
+      if ((result.status === 'SUCCESS' || result.status === 'COMPLETED') && result.result) {
+        return result.result;
+      }
+      
+      if (result.status === 'FAILURE' || result.status === 'REVOKED') {
+        throw new ApiError(
+          result.message || 'Task failed',
+          undefined,
+          'TASK_FAILED'
+        );
+      }
+      
+      // Wait before polling again
+      await new Promise(resolve => setTimeout(resolve, interval));
     }
+   
+    throw new ApiError(
+      'Task polling timed out',
+      undefined,
+      'POLLING_TIMEOUT'
+    );
   }
 }
 
@@ -142,8 +150,6 @@ export const apiClient = new ApiClient();
 // Export error class for error handling
 export { ApiError };
 
-// Export types
-export type { ApiResponse };
 
 // Utility functions for common API operations
 export const apiUtils = {
@@ -157,13 +163,20 @@ export const apiUtils = {
           return 'Unable to connect to the server. Please check your internet connection.';
         case 'VALIDATION_ERROR':
           return 'Invalid VIN format. Please check and try again.';
+        case 'TASK_FAILED':
+          return 'Report generation failed. Please try again.';
+        case 'POLLING_TIMEOUT':
+          return 'Report generation is taking longer than expected. Please try again later.';
+        case 'TIMEOUT':
+          return 'Request timed out. Please try again.';
+        case 'TASK_NOT_FOUND':
+          return 'Task not found. The report generation task may have expired. Please try generating the report again.';
         default:
           // Ensure message is a string
           const message = error.message;
           if (typeof message === 'string') {
             return message;
           } else if (message && typeof message === 'object') {
-            // If message is an object, try to extract a meaningful string
             return JSON.stringify(message);
           }
           return 'An unexpected error occurred.';

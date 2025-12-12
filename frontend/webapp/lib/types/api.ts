@@ -3,6 +3,40 @@ export interface VinReportRequest {
   vin: string;
 }
 
+// Task Status Enum
+export enum TaskStatus {
+  PENDING = 'PENDING',
+  STARTED = 'STARTED',
+  SUCCESS = 'SUCCESS',
+  COMPLETED = 'COMPLETED',
+  FAILURE = 'FAILURE'
+}
+
+// Celery Task Types for Asynchronous Processing
+export interface CeleryTask {
+  id: string;
+}
+
+export interface ReportTaskResult {
+  message: string;
+  status: TaskStatus | 'REVOKED' | 'IN_PROGRESS';
+  result?: BackendReportResponse;
+}
+
+// Report Data Structure (Placeholder)
+export interface ReportData {
+  vin: string;
+  report_data: Record<string, any>;
+  generated_at: string;
+  providers_used: string[];
+  confidence_score: number;
+}
+
+export interface PollingOptions {
+  interval?: number; // Polling interval in ms
+  timeout?: number; // Maximum polling time in ms
+}
+
 // Backend Response Types (matching Python models)
 export interface ProviderData {
   provider_name: string;
@@ -53,13 +87,24 @@ export interface ReportSection {
   lastUpdated?: Date;
 }
 
-export type SectionData = 
+export type SectionData =
+  | VehicleData
   | MaintenanceData
   | AccidentData
   | OwnershipData
   | RecallData
   | TitleData
   | InsuranceData;
+
+export interface VehicleData {
+  type: 'vehicle';
+  vin: string;
+  make: string;
+  model: string;
+  year: number;
+  engine: string;
+  transmission: string;
+}
 
 export interface MaintenanceData {
   type: 'maintenance';
@@ -198,11 +243,12 @@ export interface ApiError {
 
 // Loading and State Types
 export interface ReportState {
-  status: 'idle' | 'validating' | 'processing' | 'completed' | 'error';
+  status: 'idle' | 'validating' | 'starting' | 'processing' | 'polling' | 'completed' | 'error';
   progress: number; // 0-100
   estimatedTime?: number; // seconds
   currentStep?: string;
   error?: string;
+  taskId?: string; // Add task ID tracking
 }
 
 

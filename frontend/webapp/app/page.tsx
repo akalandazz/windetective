@@ -3,11 +3,10 @@
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/main-layout';
 import VinInput from '@/components/vin-input';
-import LoadingState from '@/components/loading-state';
+import LoadingOverlay from '@/components/loading-overlay';
 import ExecutiveSummary from '@/components/executive-summary';
 import { useReport } from '@/lib/hooks/use-report';
 import { buildClassName } from '@/lib/design-system';
-import Container from '@/components/layout/container';
 
 export default function HomePage() {
   const [showDetailedReport, setShowDetailedReport] = useState(false);
@@ -174,16 +173,8 @@ export default function HomePage() {
       );
     }
 
-    // Show loading state
-    if (isLoading) {
-      return (
-        <LoadingState
-          state={state}
-          onCancel={cancelReport}
-          className="mb-8"
-        />
-      );
-    }
+    // Show loading state - handled by overlay now
+    // The overlay will show when isLoading is true
 
     // Show VIN input form (initial state)
     return (
@@ -250,6 +241,12 @@ export default function HomePage() {
       <div id="main-content" className="focus:outline-none" tabIndex={-1}>
         {getCurrentContent()}
       </div>
+
+      <LoadingOverlay
+        isVisible={isLoading}
+        state={state}
+        onCancel={cancelReport}
+      />
     </MainLayout>
   );
 }

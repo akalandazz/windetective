@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
+from enums import TaskStatus
+
 class ReportRequest(BaseModel):
     vin: str
 
@@ -22,3 +24,12 @@ class ReportResponse(BaseModel):
     generated_at: datetime
     providers_used: List[str]
     confidence_score: float  # 0-1, how complete the data is
+
+class ReportTaskResult(BaseModel):
+    message: str
+    status: TaskStatus
+    result: Optional[ReportResponse] = None
+
+
+class CeleryTask(BaseModel):
+    id: str

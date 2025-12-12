@@ -10,9 +10,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
-    <header className={buildClassName('bg-white border-b border-neutral-200 sticky top-0 z-30', className)}>
+    <header className={buildClassName('bg-background border-b border-border sticky top-0 z-30', className)}>
       <Container>
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 py-4">
           {/* Logo and Brand */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
@@ -36,21 +36,21 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <a href="#features" className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium">
+                  <a href="#features" className="text-foreground/80 hover:text-primary transition-colors duration-200 text-[0.875rem] font-medium leading-[1.25rem] px-3">
                     Features
                   </a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <a href="#pricing" className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium">
+                  <a href="#pricing" className="text-foreground/80 hover:text-primary transition-colors duration-200 text-[0.875rem] font-medium leading-[1.25rem] px-3">
                     Pricing
                   </a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <a href="#about" className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium">
+                  <a href="#about" className="text-foreground/80 hover:text-primary transition-colors duration-200 text-[0.875rem] font-medium leading-[1.25rem] px-3">
                     About
                   </a>
                 </NavigationMenuLink>
@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </NavigationMenu>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Help Button */}
             <button 
               className="p-2 text-neutral-500 hover:text-primary-600 transition-colors duration-200"
@@ -97,24 +97,24 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
         <div className="md:hidden bg-white border-t border-neutral-200">
           <Container>
             <nav className="py-4">
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-3">
                 <a
                   href="#features"
-                  className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
+                  className="text-foreground/80 hover:text-primary transition-colors duration-200 text-[0.875rem] font-medium leading-[1.25rem]"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Features
                 </a>
                 <a
                   href="#pricing"
-                  className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
+                  className="text-foreground/80 hover:text-primary transition-colors duration-200 text-[0.875rem] font-medium leading-[1.25rem]"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Pricing
                 </a>
                 <a
                   href="#about"
-                  className="text-neutral-700 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
+                  className="text-foreground/80 hover:text-primary transition-colors duration-200 text-[0.875rem] font-medium leading-[1.25rem]"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   About

@@ -36,10 +36,12 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
     estimatedTime: undefined,
     currentStep: undefined,
     error: undefined,
+    taskId: undefined,
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingTimeoutRef = useRef<number | null>(null);
 
   // Cleanup function
   const cleanup = useCallback(() => {
@@ -51,6 +53,10 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       clearInterval(progressIntervalRef.current);
       progressIntervalRef.current = null;
     }
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+      pollingTimeoutRef.current = null;
+    }
   }, []);
 
   // Progress simulation function
@@ -61,11 +67,11 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
     progressIntervalRef.current = setInterval(() => {
       currentProgress = Math.min(currentProgress + increment, endProgress);
       
-      setState(prev => ({
+      setState((prev: ReportState) => ({
         ...prev,
         progress: Math.round(currentProgress),
       }));
-
+ 
       if (currentProgress >= endProgress) {
         if (progressIntervalRef.current) {
           clearInterval(progressIntervalRef.current);
@@ -78,7 +84,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
   // Update current step based on progress
   useEffect(() => {
     if (state.status !== 'processing') return;
-
+ 
     let currentStep: string;
     if (state.progress < 25) {
       currentStep = 'Validating VIN and checking format';
@@ -91,8 +97,8 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
     } else {
       currentStep = 'Finalizing report structure';
     }
-
-    setState(prev => ({ ...prev, currentStep }));
+ 
+    setState((prev: ReportState) => ({ ...prev, currentStep }));
   }, [state.progress, state.status]);
 
   const generateReport = useCallback(async (vin: string) => {
@@ -104,7 +110,8 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       estimatedTime: 30,
       currentStep: 'Validating VIN format',
       error: undefined,
-    });
+      taskId: undefined,
+    } as ReportState);
 
     // Clean up any previous requests
     cleanup();
@@ -112,7 +119,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
     // Validate VIN
     const validation = apiUtils.validateVin(vin);
     if (!validation.isValid) {
-      setState(prev => ({
+      setState((prev: ReportState) => ({
         ...prev,
         status: 'error',
         error: validation.error,
@@ -125,44 +132,179 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       // Create abort controller for this request
       abortControllerRef.current = new AbortController();
 
-      // Start processing state
-      setState(prev => ({
+      // Start task state
+      setState((prev: ReportState) => ({
         ...prev,
-        status: 'processing',
-        progress: 5,
-        currentStep: 'Sending request to server',
+        status: 'starting',
+        progress: 10,
+        currentStep: 'Starting report generation task',
       }));
 
-      // Start progress simulation
-      simulateProgress(5, 85);
-
-      // Make API call with timeout and retry
-      const backendResponse = await apiUtils.retry(
+      // Start the report task
+      const taskResponse = await apiUtils.retry(
         () => apiUtils.withTimeout(
-          apiClient.generateReport({ vin }),
+          apiClient.startReportTask(vin),
           timeoutMs
         ),
         retryAttempts
       );
 
-      // Stop progress simulation
-      cleanup();
-
-      // Set completion progress
-      setState(prev => ({
+      // Update state with task ID
+      setState((prev: ReportState) => ({
         ...prev,
-        progress: 100,
-        currentStep: 'Report completed successfully',
+        status: 'polling',
+        progress: 20,
+        currentStep: 'Generating report (this may take a moment)',
+        taskId: taskResponse.id,
       }));
 
+      // Enhanced polling system with proper state management
+          const backendResponse = await new Promise<BackendReportResponse>(async (resolve, reject) => {
+            let attemptCount = 0;
+            const maxAttempts = 100;
+            const pollingInterval = 2000; // 2 seconds
+            
+            const pollTask = async () => {
+              try {
+                attemptCount++;
+                console.log(`Polling attempt ${attemptCount} for task ${taskResponse.id}`);
+                
+                // Update progress based on attempts
+                const progress = Math.min(90, 20 + Math.floor((attemptCount / maxAttempts) * 70));
+                setState((prev: ReportState) => ({
+                  ...prev,
+                  progress,
+                  currentStep: `Polling for results (attempt ${attemptCount}/${maxAttempts})`,
+                }));
+                
+                const result = await apiClient.getTaskResult(taskResponse.id);
+                
+                console.log(`Task ${taskResponse.id} status: ${result.status}`);
+  
+                // Handle different task states
+               switch (result.status) {
+                 case 'SUCCESS':
+                 case 'COMPLETED':
+                   if (result.result) {
+                     console.log('Task completed successfully');
+                     resolve(result.result);
+                     return;
+                   } else {
+                     throw new ApiError('Task completed but no result returned', undefined, 'NO_RESULT');
+                   }
+                 case 'PENDING':
+                   console.log('Task is pending, continuing to poll...');
+                   // Continue polling for PENDING tasks
+                   if (attemptCount >= maxAttempts) {
+                     console.error('Maximum polling attempts reached');
+                     reject(new ApiError(
+                       'Request taking too long. Please try again.',
+                       undefined,
+                       'POLLING_TIMEOUT'
+                     ));
+                     return;
+                   }
+                   // Schedule next poll
+                   pollingTimeoutRef.current = window.setTimeout(pollTask, pollingInterval);
+                   return;
+                    
+                 case 'FAILURE':
+                 case 'REVOKED':
+                   console.error('Task failed:', result.message || 'Unknown error');
+                   reject(new ApiError(
+                     result.message || 'Task failed',
+                     undefined,
+                     'TASK_FAILED'
+                   ));
+                   return;
+                    
+                 case 'PENDING':
+                 case 'STARTED':
+                 case 'IN_PROGRESS':
+                   // Continue polling
+                   if (attemptCount >= maxAttempts) {
+                     console.error('Maximum polling attempts reached');
+                     reject(new ApiError(
+                       'Request taking too long. Please try again.',
+                       undefined,
+                       'POLLING_TIMEOUT'
+                     ));
+                     return;
+                   }
+                    
+                   // Schedule next poll
+                   pollingTimeoutRef.current = window.setTimeout(pollTask, pollingInterval);
+                   return;
+                    
+                 default:
+                   console.error('Unknown task status:', result.status);
+                   reject(new ApiError(
+                     `Unknown task status: ${result.status}`,
+                     undefined,
+                     'UNKNOWN_STATUS'
+                   ));
+                   return;
+               }
+              } catch (error) {
+                console.error('Polling error:', error);
+  
+                // Clean up timeout
+                if (pollingTimeoutRef.current) {
+                  clearTimeout(pollingTimeoutRef.current);
+                  pollingTimeoutRef.current = null;
+                }
+  
+                // Handle network errors and other issues
+                if (error instanceof ApiError) {
+                  // Handle task not found error specifically
+                  if (error.message.includes('Task ID') && error.message.includes('not found')) {
+                    reject(new ApiError(
+                      'Task not found. The report generation task may have expired or been cleaned up. Please try generating the report again.',
+                      undefined,
+                      'TASK_NOT_FOUND'
+                    ));
+                  } else {
+                    reject(error);
+                  }
+                } else {
+                  reject(new ApiError(
+                    error instanceof Error ? error.message : 'Network error during polling',
+                    undefined,
+                    'NETWORK_ERROR'
+                  ));
+                }
+              }
+            };
+            
+            // Start polling
+            pollTask();
+            
+            // Set overall timeout
+            setTimeout(() => {
+              if (pollingTimeoutRef.current) {
+                clearTimeout(pollingTimeoutRef.current);
+                pollingTimeoutRef.current = null;
+              }
+              reject(new ApiError(
+                'Request timed out after maximum duration',
+                undefined,
+                'POLLING_TIMEOUT'
+              ));
+            }, timeoutMs);
+          });
+
       // Transform backend response to frontend format
+      console.log('About to transform backend response:', backendResponse);
       const transformedReport = transformBackendReport(backendResponse, vin);
+      console.log('Successfully transformed report:', transformedReport);
       setReport(transformedReport);
 
       // Complete state
-      setState(prev => ({
+      setState((prev: ReportState) => ({
         ...prev,
         status: 'completed',
+        progress: 100,
+        currentStep: 'Report completed successfully',
         error: undefined,
       }));
 
@@ -172,8 +314,9 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       cleanup();
 
       const errorMessage = apiUtils.handleApiError(error);
+      console.error('Report generation failed:', error);
 
-      setState(prev => ({
+      setState((prev: ReportState) => ({
         ...prev,
         status: 'error',
         error: errorMessage,
@@ -182,11 +325,11 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
 
       onError?.(errorMessage);
     }
-  }, [cleanup, simulateProgress, timeoutMs, retryAttempts, onSuccess, onError]);
+  }, [cleanup, timeoutMs, retryAttempts, onSuccess, onError]);
 
   const cancelReport = useCallback(() => {
     cleanup();
-    setState(prev => ({
+    setState((prev: ReportState) => ({
       ...prev,
       status: 'idle',
       progress: 0,
@@ -213,7 +356,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
   }, [cleanup]);
 
   // Computed values
-  const isLoading = state.status === 'validating' || state.status === 'processing';
+  const isLoading = state.status === 'validating' || state.status === 'starting' || state.status === 'polling';
   const hasError = state.status === 'error';
   const error = state.error || null;
 
@@ -229,93 +372,5 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
   };
 };
 
-// Additional utility hooks for specific use cases
-
-export const useReportWithLocalStorage = (storageKey: string = 'carHistoryReport') => {
-  const reportHook = useReport();
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Validate that it's a valid report format before setting
-        if (parsed && parsed.vin && parsed.executiveSummary) {
-          reportHook.reset(); // Reset first to clear any existing state
-          // Note: We don't set the report directly from localStorage 
-          // to ensure data consistency and security
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to load report from localStorage:', error);
-    }
-  }, [storageKey]);
-
-  // Save to localStorage when report changes
-  useEffect(() => {
-    if (reportHook.report) {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify({
-          ...reportHook.report,
-          // Add metadata for cache validation
-          cachedAt: new Date().toISOString(),
-          version: '1.0',
-        }));
-      } catch (error) {
-        console.warn('Failed to save report to localStorage:', error);
-      }
-    }
-  }, [reportHook.report, storageKey]);
-
-  return reportHook;
-};
-
-export const useReportPolling = (pollingInterval: number = 5000) => {
-  const reportHook = useReport();
-  const [isPolling, setIsPolling] = useState(false);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const startPolling = useCallback((vin: string) => {
-    setIsPolling(true);
-    
-    pollingIntervalRef.current = setInterval(() => {
-      if (reportHook.state.status === 'completed' || reportHook.hasError) {
-        setIsPolling(false);
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current);
-          pollingIntervalRef.current = null;
-        }
-        return;
-      }
-      
-      // In a real implementation, this might check job status
-      // For now, we'll just continue with the normal flow
-    }, pollingInterval);
-  }, [reportHook, pollingInterval]);
-
-  const stopPolling = useCallback(() => {
-    setIsPolling(false);
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
-    };
-  }, []);
-
-  return {
-    ...reportHook,
-    isPolling,
-    startPolling,
-    stopPolling,
-  };
-};
 
 export default useReport;

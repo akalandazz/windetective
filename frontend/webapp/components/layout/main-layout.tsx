@@ -12,7 +12,7 @@ const MainLayout: React.FC<LayoutProps> = ({
   className = '',
 }) => {
   return (
-    <div className={buildClassName('min-h-screen bg-neutral-50', className)}>
+    <div className={buildClassName('min-h-screen bg-background', className)}>
       {/* Custom Header or Default Header */}
       {header || <Header />}
       
@@ -41,7 +41,7 @@ const MainLayout: React.FC<LayoutProps> = ({
       
       {/* Footer */}
       {footer && (
-        <footer className="bg-white border-t border-neutral-200">
+        <footer className="bg-background border-t border-border">
           <Container>
             <div className="py-8">
               {footer}

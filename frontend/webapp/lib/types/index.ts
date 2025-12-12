@@ -28,62 +28,32 @@ export type {
   ChartDataPoint,
   ChartConfig,
   ReportFilters,
-  SearchResult
+  SearchResult,
+  TaskStatus,
+  CeleryTask,
+  ReportTaskResult,
+  ReportData
 } from './api';
 
 export type {
   // Component Props Types
   VinInputProps,
   LoadingStateProps,
-  ReportDisplayProps,
   ExecutiveSummaryProps,
-  ReportSectionProps,
-  StatusBadgeProps,
-  ProgressBarProps,
-  ChartProps,
-  SkeletonProps,
-  ErrorBoundaryProps,
-  ModalProps,
-  TooltipProps,
-  AccordionProps,
-  AccordionItem,
-  
-  // Form Types
-  VinFormData,
-  VinFormErrors,
-  FormFieldProps,
-  InputProps,
-  ButtonProps,
-  
-  // Layout Types
   LayoutProps,
   ContainerProps,
-  SidebarProps,
-  SidebarSection,
-  
-  // Navigation Types
-  BreadcrumbProps,
-  BreadcrumbItem,
-  TabsProps,
-  TabItem,
-  
-  // Data Display Types
-  DataTableProps,
-  TableColumn,
-  PaginationConfig,
-  SortingConfig,
-  StatsCardProps,
-  TimelineProps,
-  TimelineItem,
-  
-  // Utility Types
-  ThemeConfig,
-  ResponsiveValue,
-  MediaQuery,
-  AccessibilityProps,
-  AnimationConfig,
-  TransitionProps
+  ChartProps
 } from './components';
+
+// NodeJS types for compatibility
+declare global {
+  namespace NodeJS {
+    interface Timeout {
+      ref(): void;
+      unref(): void;
+    }
+  }
+}
 
 // Common utility types
 export type DeepPartial<T> = {

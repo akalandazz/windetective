@@ -2,6 +2,7 @@ import requests
 from datetime import datetime
 from typing import Dict, Any
 import logging
+from settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ def fetch_carfax_data(vin: str) -> Dict[str, Any]:
     try:
         # Mock API endpoint and key
         api_url = "https://api.carfax.com/v1/vehicle/history"
-        api_key = "your_carfax_api_key_here"  # Replace with actual key
+        api_key = settings.carfax_api_key or "your_carfax_api_key_here"  # Fallback for mock
 
         headers = {
             "Authorization": f"Bearer {api_key}",
