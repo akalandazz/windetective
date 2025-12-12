@@ -104,6 +104,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       estimatedTime: 30,
       currentStep: 'Validating VIN format',
       error: undefined,
+      taskId: undefined,
     });
 
     // Clean up any previous requests
@@ -125,35 +126,43 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       // Create abort controller for this request
       abortControllerRef.current = new AbortController();
 
-      // Start processing state
+      // Start task state
       setState(prev => ({
         ...prev,
-        status: 'processing',
-        progress: 5,
-        currentStep: 'Sending request to server',
+        status: 'starting',
+        progress: 10,
+        currentStep: 'Starting report generation task',
       }));
 
-      // Start progress simulation
-      simulateProgress(5, 85);
-
-      // Make API call with timeout and retry
-      const backendResponse = await apiUtils.retry(
+      // Start the report task
+      const taskResponse = await apiUtils.retry(
         () => apiUtils.withTimeout(
-          apiClient.generateReport({ vin }),
+          apiClient.startReportTask(vin),
           timeoutMs
         ),
         retryAttempts
       );
 
-      // Stop progress simulation
-      cleanup();
-
-      // Set completion progress
+      // Update state with task ID
       setState(prev => ({
         ...prev,
-        progress: 100,
-        currentStep: 'Report completed successfully',
+        status: 'polling',
+        progress: 20,
+        currentStep: 'Generating report (this may take a moment)',
+        taskId: taskResponse.id,
       }));
+
+      // Poll for task completion
+      const backendResponse = await apiUtils.retry(
+        () => apiUtils.withTimeout(
+          apiClient.pollTaskResult(taskResponse.id, {
+            interval: 2000,
+            timeout: timeoutMs
+          }),
+          timeoutMs
+        ),
+        retryAttempts
+      );
 
       // Transform backend response to frontend format
       const transformedReport = transformBackendReport(backendResponse, vin);
@@ -163,6 +172,8 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       setState(prev => ({
         ...prev,
         status: 'completed',
+        progress: 100,
+        currentStep: 'Report completed successfully',
         error: undefined,
       }));
 
@@ -182,7 +193,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
 
       onError?.(errorMessage);
     }
-  }, [cleanup, simulateProgress, timeoutMs, retryAttempts, onSuccess, onError]);
+  }, [cleanup, timeoutMs, retryAttempts, onSuccess, onError]);
 
   const cancelReport = useCallback(() => {
     cleanup();

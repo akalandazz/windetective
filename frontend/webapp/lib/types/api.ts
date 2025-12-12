@@ -3,6 +3,22 @@ export interface VinReportRequest {
   vin: string;
 }
 
+// Celery Task Types for Asynchronous Processing
+export interface CeleryTask {
+  id: string;
+}
+
+export interface ReportTaskResult {
+  message: string;
+  status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'REVOKED';
+  result?: BackendReportResponse;
+}
+
+export interface PollingOptions {
+  interval?: number; // Polling interval in ms
+  timeout?: number; // Maximum polling time in ms
+}
+
 // Backend Response Types (matching Python models)
 export interface ProviderData {
   provider_name: string;
@@ -209,11 +225,12 @@ export interface ApiError {
 
 // Loading and State Types
 export interface ReportState {
-  status: 'idle' | 'validating' | 'processing' | 'completed' | 'error';
+  status: 'idle' | 'validating' | 'starting' | 'polling' | 'completed' | 'error';
   progress: number; // 0-100
   estimatedTime?: number; // seconds
   currentStep?: string;
   error?: string;
+  taskId?: string; // Add task ID tracking
 }
 
 

@@ -14,31 +14,41 @@ const LoadingState: React.FC<LoadingStateProps> = ({
       id: 'validate',
       title: 'Validating VIN',
       description: 'Verifying vehicle identification number format and authenticity',
-      status: 'completed' as const,
+      status: state.status === 'validating' ? 'active' :
+             state.status === 'starting' || state.status === 'polling' || state.status === 'completed' ? 'completed' : 'pending',
       duration: 2,
+    },
+    {
+      id: 'start',
+      title: 'Starting Task',
+      description: 'Creating report generation task on the server',
+      status: state.status === 'starting' ? 'active' :
+             state.status === 'polling' || state.status === 'completed' ? 'completed' : 'pending',
+      duration: 3,
     },
     {
       id: 'gather',
       title: 'Gathering Data',
       description: 'Collecting information from multiple automotive databases',
-      status: state.status === 'processing' && state.progress < 50 ? 'active' : 
-             state.status === 'completed' || state.progress >= 50 ? 'completed' : 'pending',
-      duration: 8,
+      status: state.status === 'polling' && state.progress < 60 ? 'active' :
+             state.status === 'completed' || state.progress >= 60 ? 'completed' : 'pending',
+      duration: 10,
     },
     {
       id: 'analyze',
       title: 'AI Analysis',
       description: 'Analyzing patterns and generating insights using advanced AI',
-      status: state.status === 'processing' && state.progress >= 50 ? 'active' : 
+      status: state.status === 'polling' && state.progress >= 60 && state.progress < 90 ? 'active' :
              state.status === 'completed' ? 'completed' : 'pending',
-      duration: 5,
+      duration: 8,
     },
     {
       id: 'generate',
       title: 'Creating Report',
       description: 'Compiling comprehensive vehicle history report with recommendations',
-      status: state.status === 'completed' ? 'completed' : 'pending',
-      duration: 3,
+      status: state.status === 'polling' && state.progress >= 90 ? 'active' :
+             state.status === 'completed' ? 'completed' : 'pending',
+      duration: 4,
     },
   ];
 
@@ -141,6 +151,13 @@ const LoadingState: React.FC<LoadingStateProps> = ({
             {getEstimatedTimeRemaining()}
           </span>
         </div>
+        
+        {/* Task ID display */}
+        {state.taskId && (
+          <div className="text-xs text-neutral-500 mt-2">
+            Task ID: {state.taskId}
+          </div>
+        )}
       </div>
 
       {/* Steps */}

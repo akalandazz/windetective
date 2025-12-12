@@ -20,8 +20,17 @@ export const transformBackendReport = (
   backendResponse: BackendReportResponse,
   vin: string
 ): CarReport => {
+  // Validate backend response structure
+  if (!backendResponse.report_data || typeof backendResponse.report_data !== 'object') {
+    throw new Error('Invalid report data structure from backend');
+  }
+
   // Parse the generated timestamp
   const generatedAt = new Date(backendResponse.generated_at);
+  
+  if (isNaN(generatedAt.getTime())) {
+    throw new Error('Invalid generated_at timestamp');
+  }
 
   // Check if report_data contains an error
   if (backendResponse.report_data.error) {
@@ -32,6 +41,26 @@ export const transformBackendReport = (
   // Parse the JSON data from backend
   const data = backendResponse.report_data;
   console.log('Parsing JSON report data:', data);
+
+  // Validate required sections exist
+  const requiredSections = [
+    'vehicle_identification',
+    'accident_history',
+    'ownership_history',
+    'title_status',
+    'recalls',
+    'maintenance',
+    'insurance_claims',
+    'overall_assessment'
+  ];
+
+  for (const section of requiredSections) {
+    if (!data[section]) {
+      console.warn(`Missing required section: ${section}`);
+      // Create empty section to maintain structure
+      data[section] = {};
+    }
+  }
 
   // Extract executive summary from JSON
   const executiveSummary: ExecutiveSummary = {
