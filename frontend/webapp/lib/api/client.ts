@@ -5,7 +5,7 @@ import type {
   CeleryTask,
   ReportTaskResult,
   PollingOptions
-} from '@/lib/types';
+} from '@/lib/types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -103,35 +103,6 @@ class ApiClient {
     });
   }
 
-  async put<T>(
-    endpoint: string,
-    data?: unknown,
-    headers?: Record<string, string>
-  ): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'DELETE',
-      headers,
-    });
-  }
-
-  // Health check endpoint
-  async healthCheck(): Promise<{ status: string }> {
-    return this.get<{ status: string }>('/health');
-  }
-
-  // VIN Report endpoints
-  async generateReport(vinData: VinReportRequest): Promise<BackendReportResponse> {
-    return this.post<BackendReportResponse>('/api/v1/reports/generate', vinData);
-  }
-
   // Celery Task endpoints for asynchronous report generation
   async startReportTask(vin: string): Promise<CeleryTask> {
     return this.post<CeleryTask>('/api/v1/reports/generate', { vin });
@@ -172,16 +143,6 @@ class ApiClient {
       undefined,
       'POLLING_TIMEOUT'
     );
-  }
-
-  // Utility method to check if API is available
-  async isApiAvailable(): Promise<boolean> {
-    try {
-      await this.healthCheck();
-      return true;
-    } catch {
-      return false;
-    }
   }
 }
 
