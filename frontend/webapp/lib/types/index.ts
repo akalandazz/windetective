@@ -41,6 +41,16 @@ export type {
   ChartProps
 } from './components';
 
+// NodeJS types for compatibility
+declare global {
+  namespace NodeJS {
+    interface Timeout {
+      ref(): void;
+      unref(): void;
+    }
+  }
+}
+
 // Common utility types
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
