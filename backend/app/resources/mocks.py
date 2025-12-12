@@ -83,7 +83,7 @@ AI_RESPONSE_MOCK = """
 
 def generate_mock_report(vin: str) -> ReportResponse:
     # Simulate processing delay to test async behavior
-    time.sleep(3)
+    time.sleep(5)
 
     aggregated_at = datetime.utcnow()
     aggregated_data = AggregatedData(
