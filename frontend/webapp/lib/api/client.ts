@@ -119,11 +119,11 @@ class ApiClient {
    
     while (Date.now() - startTime < timeout) {
       const result = await this.getTaskResult(taskId);
-     
-      if (result.status === 'SUCCESS' && result.result) {
+      
+      if ((result.status === 'SUCCESS' || result.status === 'COMPLETED') && result.result) {
         return result.result;
       }
-     
+      
       if (result.status === 'FAILURE' || result.status === 'REVOKED') {
         throw new ApiError(
           result.message || 'Task failed',
@@ -131,7 +131,7 @@ class ApiClient {
           'TASK_FAILED'
         );
       }
-     
+      
       // Wait before polling again
       await new Promise(resolve => setTimeout(resolve, interval));
     }

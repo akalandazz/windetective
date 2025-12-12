@@ -8,6 +8,7 @@ export enum TaskStatus {
   PENDING = 'PENDING',
   STARTED = 'STARTED',
   SUCCESS = 'SUCCESS',
+  COMPLETED = 'COMPLETED',
   FAILURE = 'FAILURE'
 }
 
@@ -18,7 +19,7 @@ export interface CeleryTask {
 
 export interface ReportTaskResult {
   message: string;
-  status: TaskStatus | 'REVOKED';
+  status: TaskStatus | 'REVOKED' | 'IN_PROGRESS';
   result?: BackendReportResponse;
 }
 

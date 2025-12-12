@@ -182,52 +182,54 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
                 console.log(`Task ${taskResponse.id} status: ${result.status}`);
                 
                 // Handle different task states
-                switch (result.status) {
-                  case 'SUCCESS':
-                    if (result.result) {
-                      console.log('Task completed successfully');
-                      resolve(result.result);
-                      return;
-                    } else {
-                      throw new ApiError('Task completed but no result returned', undefined, 'NO_RESULT');
-                    }
+               switch (result.status) {
+                 case 'SUCCESS':
+                 case 'COMPLETED':
+                   if (result.result) {
+                     console.log('Task completed successfully');
+                     resolve(result.result);
+                     return;
+                   } else {
+                     throw new ApiError('Task completed but no result returned', undefined, 'NO_RESULT');
+                   }
                     
-                  case 'FAILURE':
-                  case 'REVOKED':
-                    console.error('Task failed:', result.message || 'Unknown error');
-                    reject(new ApiError(
-                      result.message || 'Task failed',
-                      undefined,
-                      'TASK_FAILED'
-                    ));
-                    return;
+                 case 'FAILURE':
+                 case 'REVOKED':
+                   console.error('Task failed:', result.message || 'Unknown error');
+                   reject(new ApiError(
+                     result.message || 'Task failed',
+                     undefined,
+                     'TASK_FAILED'
+                   ));
+                   return;
                     
-                  case 'PENDING':
-                  case 'STARTED':
-                    // Continue polling
-                    if (attemptCount >= maxAttempts) {
-                      console.error('Maximum polling attempts reached');
-                      reject(new ApiError(
-                        'Request taking too long. Please try again.',
-                        undefined,
-                        'POLLING_TIMEOUT'
-                      ));
-                      return;
-                    }
+                 case 'PENDING':
+                 case 'STARTED':
+                 case 'IN_PROGRESS':
+                   // Continue polling
+                   if (attemptCount >= maxAttempts) {
+                     console.error('Maximum polling attempts reached');
+                     reject(new ApiError(
+                       'Request taking too long. Please try again.',
+                       undefined,
+                       'POLLING_TIMEOUT'
+                     ));
+                     return;
+                   }
                     
-                    // Schedule next poll
-                    pollingTimeoutRef.current = window.setTimeout(pollTask, pollingInterval);
-                    return;
+                   // Schedule next poll
+                   pollingTimeoutRef.current = window.setTimeout(pollTask, pollingInterval);
+                   return;
                     
-                  default:
-                    console.error('Unknown task status:', result.status);
-                    reject(new ApiError(
-                      `Unknown task status: ${result.status}`,
-                      undefined,
-                      'UNKNOWN_STATUS'
-                    ));
-                    return;
-                }
+                 default:
+                   console.error('Unknown task status:', result.status);
+                   reject(new ApiError(
+                     `Unknown task status: ${result.status}`,
+                     undefined,
+                     'UNKNOWN_STATUS'
+                   ));
+                   return;
+               }
               } catch (error) {
                 console.error('Polling error:', error);
                 
