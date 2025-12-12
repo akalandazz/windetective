@@ -1,6 +1,7 @@
 from models import AggregatedData, ProviderData, ReportResponse
 from datetime import datetime
 import json
+import time
 
 
 AI_RESPONSE_MOCK = """
@@ -81,6 +82,8 @@ AI_RESPONSE_MOCK = """
 
 
 def generate_mock_report(vin: str) -> ReportResponse:
+    # Simulate processing delay to test async behavior
+    time.sleep(3)
 
     aggregated_at = datetime.utcnow()
     aggregated_data = AggregatedData(
