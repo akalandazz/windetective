@@ -180,7 +180,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
                 const result = await apiClient.getTaskResult(taskResponse.id);
                 
                 console.log(`Task ${taskResponse.id} status: ${result.status}`);
-                
+  
                 // Handle different task states
                switch (result.status) {
                  case 'SUCCESS':
@@ -192,6 +192,21 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
                    } else {
                      throw new ApiError('Task completed but no result returned', undefined, 'NO_RESULT');
                    }
+                 case 'PENDING':
+                   console.log('Task is pending, continuing to poll...');
+                   // Continue polling for PENDING tasks
+                   if (attemptCount >= maxAttempts) {
+                     console.error('Maximum polling attempts reached');
+                     reject(new ApiError(
+                       'Request taking too long. Please try again.',
+                       undefined,
+                       'POLLING_TIMEOUT'
+                     ));
+                     return;
+                   }
+                   // Schedule next poll
+                   pollingTimeoutRef.current = window.setTimeout(pollTask, pollingInterval);
+                   return;
                     
                  case 'FAILURE':
                  case 'REVOKED':
@@ -232,16 +247,25 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
                }
               } catch (error) {
                 console.error('Polling error:', error);
-                
+  
                 // Clean up timeout
                 if (pollingTimeoutRef.current) {
                   clearTimeout(pollingTimeoutRef.current);
                   pollingTimeoutRef.current = null;
                 }
-                
+  
                 // Handle network errors and other issues
                 if (error instanceof ApiError) {
-                  reject(error);
+                  // Handle task not found error specifically
+                  if (error.message.includes('Task ID') && error.message.includes('not found')) {
+                    reject(new ApiError(
+                      'Task not found. The report generation task may have expired or been cleaned up. Please try generating the report again.',
+                      undefined,
+                      'TASK_NOT_FOUND'
+                    ));
+                  } else {
+                    reject(error);
+                  }
                 } else {
                   reject(new ApiError(
                     error instanceof Error ? error.message : 'Network error during polling',
@@ -271,7 +295,9 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
           });
 
       // Transform backend response to frontend format
+      console.log('About to transform backend response:', backendResponse);
       const transformedReport = transformBackendReport(backendResponse, vin);
+      console.log('Successfully transformed report:', transformedReport);
       setReport(transformedReport);
 
       // Complete state
@@ -289,6 +315,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
       cleanup();
 
       const errorMessage = apiUtils.handleApiError(error);
+      console.error('Report generation failed:', error);
 
       setState((prev: ReportState) => ({
         ...prev,

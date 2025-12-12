@@ -169,6 +169,8 @@ export const apiUtils = {
           return 'Report generation is taking longer than expected. Please try again later.';
         case 'TIMEOUT':
           return 'Request timed out. Please try again.';
+        case 'TASK_NOT_FOUND':
+          return 'Task not found. The report generation task may have expired. Please try generating the report again.';
         default:
           // Ensure message is a string
           const message = error.message;

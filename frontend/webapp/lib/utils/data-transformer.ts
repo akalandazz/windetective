@@ -14,6 +14,10 @@ export const transformBackendReport = (
   backendResponse: BackendReportResponse,
   vin: string
 ): CarReport => {
+  // Add detailed logging for debugging
+  console.log('Backend response received:', backendResponse);
+  console.log('Confidence score from backend:', backendResponse.confidence_score);
+
   // Validate backend response structure
   if (!backendResponse.report_data || typeof backendResponse.report_data !== 'object') {
     throw new Error('Invalid report data structure from backend');
@@ -30,6 +34,12 @@ export const transformBackendReport = (
   if (backendResponse.report_data.error) {
     console.error('Backend returned error in report_data:', backendResponse.report_data.error);
     throw new Error(`Report generation failed: ${backendResponse.report_data.error}`);
+  }
+
+  // Handle case where AI response might be incomplete or malformed
+  if (!backendResponse.report_data.vehicle_identification) {
+    console.error('Missing required vehicle_identification section in report data');
+    throw new Error('Invalid report data: missing vehicle identification');
   }
 
   // Parse the JSON data from backend
@@ -88,14 +98,27 @@ export const transformBackendReport = (
 
   // Create metadata
   const dataCompletion = calculateDataCompletion(data);
+  
+  // Debug confidence score calculation
+  console.log('Original confidence score:', backendResponse.confidence_score);
+  
+  // Handle both 0-1 and 0-10 confidence score scales from backend
+  // If confidence_score is already <= 1, use it directly (0-1 scale)
+  // If confidence_score is > 1, normalize from 0-10 to 0-1 scale
+  const normalizedConfidence = backendResponse.confidence_score <= 1
+    ? backendResponse.confidence_score
+    : backendResponse.confidence_score / 10;
+  
+  console.log('Normalized confidence score:', normalizedConfidence);
+  
   const metadata: ReportMetadata = {
-    dataQuality: backendResponse.confidence_score / 10, // Normalize from 0-10 to 0-1
+    dataQuality: normalizedConfidence, // Normalize from 0-10 to 0-1
     dataCompletion,
     lastDataUpdate: generatedAt,
     sources: backendResponse.providers_used.map(provider => ({
       name: provider,
       coverage: dataCompletion, // Use actual data completion as coverage indicator
-      reliability: backendResponse.confidence_score / 10, // Use confidence score as reliability indicator
+      reliability: normalizedConfidence, // Use confidence score as reliability indicator
       lastUpdate: generatedAt, // Use report generation time as last update
     })),
     processingTime: 5000 + Math.random() * 5000, // Realistic processing time between 5-10 seconds

@@ -103,5 +103,5 @@ def generate_mock_report(vin: str) -> ReportResponse:
         report_data=json.loads(AI_RESPONSE_MOCK),
         generated_at=aggregated_at,
         providers_used=[p.provider_name for p in aggregated_data.providers if p.status == "success"],
-        confidence_score=10
+        confidence_score=1.0  # Use 0-1 scale to match real backend behavior
     )
