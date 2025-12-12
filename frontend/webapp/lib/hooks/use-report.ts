@@ -357,7 +357,7 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
   }, [cleanup]);
 
   // Computed values
-  const isLoading = state.status === 'validating' || state.status === 'processing';
+  const isLoading = state.status === 'validating' || state.status === 'starting' || state.status === 'polling';
   const hasError = state.status === 'error';
   const error = state.error || null;
 

@@ -26,6 +26,13 @@ export interface LoadingStateProps {
   className?: string;
 }
 
+export interface LoadingOverlayProps {
+  isVisible: boolean;
+  state: ReportState;
+  onCancel?: () => void;
+  className?: string;
+}
+
 export interface ExecutiveSummaryProps {
   summary: ExecutiveSummary;
   onViewDetails?: () => void;
