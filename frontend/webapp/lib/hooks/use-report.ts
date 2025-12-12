@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { CarReport, ReportState, BackendReportResponse } from '@/lib/types';
-import { apiClient, apiUtils, ApiError } from '@/lib/api/client';
+import type { CarReport, ReportState } from '@/lib/types';
+import { apiClient, apiUtils } from '@/lib/api/client';
 import { transformBackendReport } from '@/lib/utils/data-transformer';
 
 interface UseReportOptions {

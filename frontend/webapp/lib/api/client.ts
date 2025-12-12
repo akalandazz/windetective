@@ -1,7 +1,5 @@
 import type {
-  VinReportRequest,
   BackendReportResponse,
-  ApiResponse,
   CeleryTask,
   ReportTaskResult,
   PollingOptions
@@ -152,8 +150,6 @@ export const apiClient = new ApiClient();
 // Export error class for error handling
 export { ApiError };
 
-// Export types
-export type { ApiResponse };
 
 // Utility functions for common API operations
 export const apiUtils = {

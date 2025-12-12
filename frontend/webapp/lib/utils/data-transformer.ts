@@ -1,14 +1,8 @@
-import type { 
-  BackendReportResponse, 
-  CarReport, 
-  ExecutiveSummary, 
+import type {
+  BackendReportResponse,
+  CarReport,
+  ExecutiveSummary,
   ReportSection,
-  MaintenanceData,
-  AccidentData,
-  OwnershipData,
-  RecallData,
-  TitleData,
-  InsuranceData,
   ReportMetadata
 } from '@/lib/types';
 
