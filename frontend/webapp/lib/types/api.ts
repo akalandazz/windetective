@@ -225,7 +225,7 @@ export interface ApiError {
 
 // Loading and State Types
 export interface ReportState {
-  status: 'idle' | 'validating' | 'starting' | 'polling' | 'completed' | 'error';
+  status: 'idle' | 'validating' | 'starting' | 'processing' | 'polling' | 'completed' | 'error';
   progress: number; // 0-100
   estimatedTime?: number; // seconds
   currentStep?: string;
