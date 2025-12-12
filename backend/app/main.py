@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from routers.report_router import router as report_router
+from routers.user_router import router as user_router
 from settings import settings
 import logging
 
@@ -19,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(report_router, prefix="/api/v1/reports", tags=["report"])
+app.include_router(user_router, prefix="/api/v1/users", tags=["user"])
 
 @app.get("/health", tags=["maintenance"])
 def health_check():
