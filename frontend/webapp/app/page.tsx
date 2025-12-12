@@ -3,12 +3,10 @@
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/main-layout';
 import VinInput from '@/components/vin-input';
-import LoadingState from '@/components/loading-state';
 import LoadingOverlay from '@/components/loading-overlay';
 import ExecutiveSummary from '@/components/executive-summary';
 import { useReport } from '@/lib/hooks/use-report';
 import { buildClassName } from '@/lib/design-system';
-import Container from '@/components/layout/container';
 
 export default function HomePage() {
   const [showDetailedReport, setShowDetailedReport] = useState(false);
