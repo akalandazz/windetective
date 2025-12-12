@@ -285,7 +285,6 @@ export const useReport = (options: UseReportOptions = {}): UseReportReturn => {
                 clearTimeout(pollingTimeoutRef.current);
                 pollingTimeoutRef.current = null;
               }
-              console.error('Overall polling timeout reached');
               reject(new ApiError(
                 'Request timed out after maximum duration',
                 undefined,
