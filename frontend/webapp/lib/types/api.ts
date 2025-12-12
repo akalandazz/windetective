@@ -3,6 +3,14 @@ export interface VinReportRequest {
   vin: string;
 }
 
+// Task Status Enum
+export enum TaskStatus {
+  PENDING = 'PENDING',
+  STARTED = 'STARTED',
+  SUCCESS = 'SUCCESS',
+  FAILURE = 'FAILURE'
+}
+
 // Celery Task Types for Asynchronous Processing
 export interface CeleryTask {
   id: string;
@@ -10,8 +18,17 @@ export interface CeleryTask {
 
 export interface ReportTaskResult {
   message: string;
-  status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'REVOKED';
+  status: TaskStatus | 'REVOKED';
   result?: BackendReportResponse;
+}
+
+// Report Data Structure (Placeholder)
+export interface ReportData {
+  vin: string;
+  report_data: Record<string, any>;
+  generated_at: string;
+  providers_used: string[];
+  confidence_score: number;
 }
 
 export interface PollingOptions {

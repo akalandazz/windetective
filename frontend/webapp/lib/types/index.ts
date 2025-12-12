@@ -28,7 +28,11 @@ export type {
   ChartDataPoint,
   ChartConfig,
   ReportFilters,
-  SearchResult
+  SearchResult,
+  TaskStatus,
+  CeleryTask,
+  ReportTaskResult,
+  ReportData
 } from './api';
 
 export type {
