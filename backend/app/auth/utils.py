@@ -1,42 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
 
-# Secret key and algorithm for JWT
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-# User model for authentication
-class User(BaseModel):
-    email: str
-    password: str
-    name: str
-    phone: str
-
-# Token model
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-# Token data model
-class TokenData(BaseModel):
-    email: Optional[str] = None
-
-# Custom login request model
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+from .config import SECRET_KEY, ALGORITHM, pwd_context, oauth2_scheme
+from .models import TokenData
 
 # Password hashing
 def get_password_hash(password: str):
