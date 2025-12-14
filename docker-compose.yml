@@ -1,5 +1,5 @@
 services:
-  postgres:
+  database:
     image: postgres:alpine
     ports:
       - "5432:5432"
@@ -50,7 +50,7 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     depends_on:
       - redis
-      - postgres
+      - database
     networks:
       - app-network
     restart: unless-stopped

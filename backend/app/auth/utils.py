@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
@@ -18,9 +18,9 @@ def verify_password(plain_password: str, hashed_password: str):
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -41,3 +41,50 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
     return token_data
+
+# Decode token without verification (for refresh)
+def decode_token_for_refresh(token: str):
+    """
+    Decode a JWT token for refresh purposes.
+    Validates the signature but allows expired tokens within a grace period.
+    """
+    try:
+        # First, try to decode with verification to check signature
+        # We use options to validate signature but ignore expiration
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM],
+            options={"verify_exp": False}  # Don't verify expiration
+        )
+
+        # Extract the expiration time
+        exp = payload.get("exp")
+        email = payload.get("sub")
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token: missing subject"
+            )
+
+        # Check if token is expired and within grace period (e.g., 7 days)
+        if exp:
+            exp_datetime = datetime.fromtimestamp(exp, tz=timezone.utc)
+            now = datetime.now(timezone.utc)
+            grace_period = timedelta(days=7)
+
+            # Token must not be expired for more than the grace period
+            if now > exp_datetime + grace_period:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token expired beyond grace period"
+                )
+
+        return TokenData(email=email)
+
+    except JWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Could not validate token: {str(e)}"
+        )

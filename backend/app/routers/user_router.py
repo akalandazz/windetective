@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from datetime import timedelta
 
 from auth import (
@@ -6,6 +7,7 @@ from auth import (
     verify_password,
     create_access_token,
     get_current_user,
+    decode_token_for_refresh,
     Token,
     ACCESS_TOKEN_EXPIRE_MINUTES,
     LoginRequest,
@@ -60,3 +62,35 @@ def get_current_user_info(current_user: str = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"email": user.email, "name": user.name, "phone": user.phone}
+
+@router.post("/refresh", response_model=Token, tags=["user"])
+def refresh_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="token"))):
+    """
+    Stateless token refresh endpoint.
+
+    Accepts a valid JWT token (even if expired) and issues a new token.
+    The token must:
+    - Have a valid signature (signed by our secret key)
+    - Not be expired for more than 7 days (grace period)
+    - Contain a valid user email
+
+    This is stateless - no database lookup or refresh token storage required.
+    """
+    # Decode and validate the token
+    token_data = decode_token_for_refresh(token)
+
+    # Verify the user still exists
+    user = get_user_by_email(token_data.email)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    # Generate a new access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+
+    return {"access_token": access_token, "token_type": "bearer"}
