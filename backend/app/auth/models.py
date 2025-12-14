@@ -20,7 +20,7 @@ class TokenData(BaseModel):
 
 # Custom login request model
 class LoginRequest(BaseModel):
-    username: str
+    email: str
     password: str
 
 # Signup request model
