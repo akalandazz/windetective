@@ -1,0 +1,36 @@
+{
+  "vin": {
+    "label": "Vehicle Identification Number (VIN)",
+    "required": "VIN is required",
+    "lengthShort": "VIN must be 17 characters ({current}/17)",
+    "lengthLong": "VIN cannot exceed 17 characters",
+    "invalidFormat": "Invalid VIN format. Contains invalid characters (I, O, Q not allowed)",
+    "helpText": "Enter the 17-character VIN from your vehicle registration or dashboard",
+    "formatExamples": "VIN Format Examples:",
+    "formatNote": "VINs are exactly 17 characters and don't contain the letters I, O, or Q",
+    "characterCount": "{count}/17",
+    "submitHelp": "Click to start generating your comprehensive vehicle history report"
+  },
+  "email": {
+    "required": "Email is required",
+    "invalid": "Please enter a valid email address"
+  },
+  "password": {
+    "required": "Password is required",
+    "minLength": "Password must be at least 8 characters long",
+    "uppercase": "Password must contain at least one uppercase letter",
+    "lowercase": "Password must contain at least one lowercase letter",
+    "digit": "Password must contain at least one digit",
+    "special": "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)"
+  },
+  "name": {
+    "required": "Name is required",
+    "minLength": "Name must be at least 2 characters"
+  },
+  "phone": {
+    "required": "Phone number is required"
+  },
+  "passwordConfirm": {
+    "mismatch": "Passwords do not match"
+  }
+}

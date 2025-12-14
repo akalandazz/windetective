@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run validate-translations && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "validate-translations": "node scripts/validate-translations.js"
   },
   "dependencies": {
     "@radix-ui/react-navigation-menu": "^1.2.14",
@@ -15,6 +16,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.559.0",
     "next": "16.0.8",
+    "next-intl": "^4.6.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "tailwind-merge": "^3.4.0",

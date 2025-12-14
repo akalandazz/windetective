@@ -1,0 +1,61 @@
+{
+  "hero": {
+    "title": {
+      "main": "AI-Powered",
+      "highlight": "Vehicle History Reports"
+    },
+    "description": "Get comprehensive insights about any vehicle using advanced AI analysis. Make confident automotive decisions with trusted data from multiple sources."
+  },
+  "vinInput": {
+    "heading": "Enter Vehicle VIN to Get Started",
+    "description": "Enter your 17-character Vehicle Identification Number to generate a comprehensive history report",
+    "placeholder": "Enter 17-character VIN",
+    "submitButton": "Generate Report",
+    "submittingButton": "Generating Report..."
+  },
+  "features": {
+    "accurate": {
+      "title": "Accurate Analysis",
+      "description": "Advanced AI analyzes data from multiple trusted automotive databases"
+    },
+    "comprehensive": {
+      "title": "Comprehensive Reports",
+      "description": "Detailed insights covering accidents, maintenance, ownership, and more"
+    },
+    "instant": {
+      "title": "Instant Results",
+      "description": "Get your complete vehicle history report in under 60 seconds"
+    }
+  },
+  "trust": {
+    "heading": "Trusted by thousands of automotive professionals",
+    "secure": "Secure & Private",
+    "officialSources": "Official Data Sources",
+    "aiPowered": "AI-Powered Analysis"
+  },
+  "demo": {
+    "text": "Don't have a VIN handy? Try our demo:",
+    "sampleButton": "Use Sample VIN ({vin})"
+  },
+  "report": {
+    "success": {
+      "badge": "Report Generated Successfully",
+      "title": "Vehicle Report for {vin}",
+      "subtitle": "Generated on {date} using {count} data sources"
+    },
+    "buttons": {
+      "viewDetails": "View Detailed Report",
+      "generateAnother": "Generate Another Report",
+      "generateNew": "Generate New Report"
+    },
+    "detailed": {
+      "title": "Vehicle Report Details",
+      "vinLabel": "VIN: {vin}",
+      "comingSoon": {
+        "title": "Detailed Report Sections Coming Soon",
+        "description": "The individual report sections (Maintenance, Accidents, Ownership, etc.) are currently being developed.",
+        "backButton": "Back to Summary"
+      }
+    }
+  }
+}
