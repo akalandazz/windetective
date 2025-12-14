@@ -44,12 +44,14 @@ def signup(signup_request: SignupRequest, db: Session = Depends(get_db)):
 def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     # Get user by email
     user = get_user_by_email(db, login_request.username)
-    if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
 
-    # Verify password
-    if not verify_password(login_request.password, user.password):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+    # Always verify password to prevent timing attacks
+    # Use a dummy hash if user doesn't exist
+    password_to_verify = user.password if user else "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqNw0NuhHe"
+
+    # Verify password (always runs even if user doesn't exist)
+    if not user or not verify_password(login_request.password, password_to_verify):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     # Generate JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

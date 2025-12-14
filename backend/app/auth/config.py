@@ -1,7 +1,11 @@
+from settings import settings
+
+
 # Secret key and algorithm for JWT
-SECRET_KEY = "your-secret-key"
+
+SECRET_KEY = settings.jwt_secret_key
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 # Password hashing
 from passlib.context import CryptContext

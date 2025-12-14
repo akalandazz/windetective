@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     celery_broker_url: str = Field(default="redis://localhost:6379/0", env="CELERY_BROKER_URL")
     celery_result_backend: str = Field(default="redis://localhost:6379/0", env="CELERY_RESULT_BACKEND")
 
+    # JWT
+    jwt_secret_key : str = Field(default="your_secret_key", env="JWT_SECRET_KEY")
+    access_token_expire_minutes : int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")
+
     class Config:
         env_file = ".env"
         case_sensitive = False
