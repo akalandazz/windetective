@@ -6,6 +6,9 @@ from fastapi import Depends, HTTPException, status
 from .config import SECRET_KEY, ALGORITHM, pwd_context, oauth2_scheme
 from .models import TokenData
 
+# Refresh token expiration (7 days)
+REFRESH_TOKEN_EXPIRE_DAYS = 7
+
 # Password hashing
 def get_password_hash(password: str):
     return pwd_context.hash(password)
@@ -87,4 +90,46 @@ def decode_token_for_refresh(token: str):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Could not validate token: {str(e)}"
+        )
+
+# Create refresh token with longer expiration
+def create_refresh_token(data: dict) -> str:
+    """
+    Create a refresh token with 7-day expiration.
+    Refresh tokens are stored in httpOnly cookies and used to obtain new access tokens.
+    """
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire, "type": "refresh"})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+# Decode refresh token from cookie
+def decode_refresh_token(token: str) -> TokenData:
+    """
+    Decode and validate a refresh token from httpOnly cookie.
+    Verifies signature and ensures it's a refresh token type.
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
+        # Verify this is a refresh token
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token type"
+            )
+
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+
+        return TokenData(email=email)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token"
         )

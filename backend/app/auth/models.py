@@ -9,10 +9,16 @@ class User(BaseModel):
     name: str
     phone: str
 
-# Token model
+# Token model (kept for backward compatibility)
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+# Token response model with expiration time
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int  # seconds until access token expires
 
 # Token data model
 class TokenData(BaseModel):

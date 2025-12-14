@@ -45,6 +45,18 @@ export type {
   ChartProps
 } from './components';
 
+export type {
+  // Auth Types
+  LoginRequest,
+  SignupRequest,
+  TokenResponse,
+  UserInfo,
+  AuthState,
+  AuthContextType,
+  PasswordValidation,
+  ValidationError
+} from './auth';
+
 // NodeJS types for compatibility
 declare global {
   namespace NodeJS {

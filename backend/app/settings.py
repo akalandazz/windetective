@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     jwt_secret_key : str = Field(default="your_secret_key", env="JWT_SECRET_KEY")
     access_token_expire_minutes : int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")
 
+    # Cookie settings
+    cookie_secure: bool = Field(default=False, env="COOKIE_SECURE")  # Set to True in production with HTTPS
+
     class Config:
         env_file = ".env"
         case_sensitive = False

@@ -7,6 +7,7 @@ import LoadingOverlay from '@/components/loading-overlay';
 import ExecutiveSummary from '@/components/executive-summary';
 import { useReport } from '@/lib/hooks/use-report';
 import { buildClassName } from '@/lib/design-system';
+import { ProtectedRoute } from '@/lib/components/protected-route';
 
 export default function HomePage() {
   const [showDetailedReport, setShowDetailedReport] = useState(false);
@@ -237,16 +238,18 @@ export default function HomePage() {
   };
 
   return (
-    <MainLayout>
-      <div id="main-content" className="focus:outline-none" tabIndex={-1}>
-        {getCurrentContent()}
-      </div>
+    <ProtectedRoute>
+      <MainLayout>
+        <div id="main-content" className="focus:outline-none" tabIndex={-1}>
+          {getCurrentContent()}
+        </div>
 
-      <LoadingOverlay
-        isVisible={isLoading}
-        state={state}
-        onCancel={cancelReport}
-      />
-    </MainLayout>
+        <LoadingOverlay
+          isVisible={isLoading}
+          state={state}
+          onCancel={cancelReport}
+        />
+      </MainLayout>
+    </ProtectedRoute>
   );
 }
