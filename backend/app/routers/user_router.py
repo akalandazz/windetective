@@ -12,6 +12,7 @@ from auth import (
     Token,
     ACCESS_TOKEN_EXPIRE_MINUTES,
     LoginRequest,
+    SignupRequest,
 )
 from services.user_service import create_user, get_user_by_email
 from database import get_db
@@ -19,22 +20,22 @@ from database import get_db
 router = APIRouter()
 
 @router.post("/signup", response_model=Token, tags=["user"])
-def signup(email: str, password: str, name: str, phone: str, db: Session = Depends(get_db)):
+def signup(signup_request: SignupRequest, db: Session = Depends(get_db)):
     # Check if user already exists
-    existing_user = get_user_by_email(db, email)
+    existing_user = get_user_by_email(db, signup_request.email)
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     # Hash the password
-    hashed_password = get_password_hash(password)
+    hashed_password = get_password_hash(signup_request.password)
 
     # Create the user
-    user = create_user(db, email=email, password=hashed_password, name=name, phone=phone)
+    user = create_user(db, email=signup_request.email, password=hashed_password, name=signup_request.name, phone=signup_request.phone)
 
     # Generate JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": email}, expires_delta=access_token_expires
+        data={"sub": signup_request.email}, expires_delta=access_token_expires
     )
 
     return {"access_token": access_token, "token_type": "bearer"}

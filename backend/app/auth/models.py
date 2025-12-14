@@ -21,3 +21,10 @@ class TokenData(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+# Signup request model
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+    phone: str
