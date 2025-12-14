@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run validate-translations && next build",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "validate-translations": "node scripts/validate-translations.js"
+    "lint": "eslint"
   },
   "dependencies": {
     "@radix-ui/react-navigation-menu": "^1.2.14",

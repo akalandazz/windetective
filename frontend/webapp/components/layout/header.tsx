@@ -2,16 +2,19 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { buildClassName } from '@/lib/design-system';
 import Container from './container';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 interface HeaderProps {
   className?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ className = '' }) => {
+  const t = useTranslations('common');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { user, isAuthenticated, logout, isLoading } = useAuth();
@@ -33,8 +36,8 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-neutral-900">CarHistory AI</h1>
-              <p className="text-xs text-neutral-600 hidden sm:block">Comprehensive Vehicle Reports</p>
+              <h1 className="text-xl font-bold text-neutral-900">{t('brand.name')}</h1>
+              <p className="text-xs text-neutral-600 hidden sm:block">{t('brand.tagline')}</p>
             </div>
           </Link>
 
@@ -43,15 +46,18 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             {/* Navigation Links */}
             <nav className="flex items-center gap-4">
               <Link href="/#features" className="text-foreground/80 hover:text-primary transition-colors text-sm font-medium px-3">
-                Features
+                {t('navigation.features')}
               </Link>
               <Link href="/#pricing" className="text-foreground/80 hover:text-primary transition-colors text-sm font-medium px-3">
-                Pricing
+                {t('navigation.pricing')}
               </Link>
               <Link href="/#about" className="text-foreground/80 hover:text-primary transition-colors text-sm font-medium px-3">
-                About
+                {t('navigation.about')}
               </Link>
             </nav>
+
+            {/* Language Switcher */}
+            <LanguageSwitcher />
 
             {/* Auth Section */}
             {!isLoading && (
@@ -89,7 +95,7 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H3zm11 4.414l-4.293 4.293a1 1 0 01-1.414 0L4 7.414 5.414 6l3.293 3.293L13.586 6 15 7.414z" clipRule="evenodd" />
                             </svg>
-                            Sign out
+                            {t('auth.signOut')}
                           </button>
                         </div>
                       </>
@@ -99,12 +105,12 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                   <div className="flex items-center gap-3">
                     <Link href="/signin">
                       <Button variant="ghost" size="sm">
-                        Sign in
+                        {t('auth.signIn')}
                       </Button>
                     </Link>
                     <Link href="/signup">
                       <Button variant="default" size="sm">
-                        Sign up
+                        {t('auth.signUp')}
                       </Button>
                     </Link>
                   </div>
@@ -141,22 +147,27 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                 className="block text-foreground/80 hover:text-primary text-sm font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Features
+                {t('navigation.features')}
               </Link>
               <Link
                 href="/#pricing"
                 className="block text-foreground/80 hover:text-primary text-sm font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Pricing
+                {t('navigation.pricing')}
               </Link>
               <Link
                 href="/#about"
                 className="block text-foreground/80 hover:text-primary text-sm font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                {t('navigation.about')}
               </Link>
+
+              {/* Language Switcher in Mobile Menu */}
+              <div className="pt-2">
+                <LanguageSwitcher />
+              </div>
 
               {!isLoading && (
                 <div className="pt-4 border-t border-neutral-200 space-y-2">
@@ -170,19 +181,19 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                         onClick={handleLogout}
                         className="w-full text-left px-3 py-2 text-sm text-error-600 hover:bg-error-50 rounded"
                       >
-                        Sign out
+                        {t('auth.signOut')}
                       </button>
                     </>
                   ) : (
                     <>
                       <Link href="/signin" onClick={() => setIsMenuOpen(false)}>
                         <Button variant="ghost" size="sm" className="w-full">
-                          Sign in
+                          {t('auth.signIn')}
                         </Button>
                       </Link>
                       <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
                         <Button variant="default" size="sm" className="w-full">
-                          Sign up
+                          {t('auth.signUp')}
                         </Button>
                       </Link>
                     </>

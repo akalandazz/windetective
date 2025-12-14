@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { validateEmail, validatePassword } from '@/lib/utils/password-validator';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,9 @@ import { buildClassName } from '@/lib/design-system';
 import type { SignupRequest } from '@/lib/types';
 
 export default function SignUpPage() {
+  const t = useTranslations('auth.signUp');
+  const tValidation = useTranslations('validation');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { signup, isAuthenticated } = useAuth();
 
@@ -46,14 +50,14 @@ export default function SignUpPage() {
 
     // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = tValidation('name.required');
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = tValidation('name.minLength');
     }
 
     // Phone validation
     if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
+      newErrors.phone = tValidation('phone.required');
     }
 
     // Password validation
@@ -64,7 +68,7 @@ export default function SignUpPage() {
 
     // Password confirmation
     if (formData.password !== formData.password_confirm) {
-      newErrors.password_confirm = 'Passwords do not match';
+      newErrors.password_confirm = tValidation('passwordConfirm.mismatch');
     }
 
     setErrors(newErrors);
@@ -87,12 +91,12 @@ export default function SignUpPage() {
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 400) {
-          setServerError('Email already registered or invalid data');
+          setServerError(t('errors.emailExists'));
         } else {
           setServerError(error.message);
         }
       } else {
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('errors.unexpected'));
       }
     } finally {
       setIsLoading(false);
@@ -114,12 +118,12 @@ export default function SignUpPage() {
             </div>
           </Link>
           <h2 className="text-3xl font-bold text-neutral-900">
-            Create your account
+            {t('title')}
           </h2>
           <p className="mt-2 text-sm text-neutral-600">
-            Already have an account?{' '}
+            {t('signInPrompt')}{' '}
             <Link href="/signin" className="font-medium text-primary-600 hover:text-primary-500">
-              Sign in
+              {t('signInLink')}
             </Link>
           </p>
         </div>
@@ -139,14 +143,14 @@ export default function SignUpPage() {
             {/* Name Field */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-neutral-700 mb-2">
-                Full Name
+                {t('fields.name')}
               </label>
               <Input
                 id="name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="John Doe"
+                placeholder={t('fields.namePlaceholder')}
                 disabled={isLoading}
                 className={buildClassName(
                   'w-full',
@@ -162,14 +166,14 @@ export default function SignUpPage() {
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
-                Email address
+                {t('fields.email')}
               </label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="you@example.com"
+                placeholder={t('fields.emailPlaceholder')}
                 disabled={isLoading}
                 className={buildClassName(
                   'w-full',
@@ -185,14 +189,14 @@ export default function SignUpPage() {
             {/* Phone Field */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-neutral-700 mb-2">
-                Phone Number
+                {t('fields.phone')}
               </label>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+1 (555) 123-4567"
+                placeholder={t('fields.phonePlaceholder')}
                 disabled={isLoading}
                 className={buildClassName(
                   'w-full',
@@ -208,7 +212,7 @@ export default function SignUpPage() {
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
-                Password
+                {t('fields.password')}
               </label>
               <Input
                 id="password"
@@ -216,7 +220,7 @@ export default function SignUpPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 onFocus={() => setShowPasswordRequirements(true)}
-                placeholder="Create a strong password"
+                placeholder={t('fields.passwordPlaceholder')}
                 disabled={isLoading}
                 className={buildClassName(
                   'w-full',
@@ -231,26 +235,26 @@ export default function SignUpPage() {
               {/* Password Requirements */}
               {showPasswordRequirements && formData.password && (
                 <div className="mt-2 p-3 bg-neutral-50 rounded-md space-y-2">
-                  <p className="text-xs font-medium text-neutral-700">Password requirements:</p>
+                  <p className="text-xs font-medium text-neutral-700">{t('passwordRequirements.title')}</p>
                   <ul className="space-y-1 text-xs">
                     <li className={formData.password.length >= 8 ? 'text-success-600' : 'text-neutral-600'}>
-                      ✓ At least 8 characters
+                      ✓ {t('passwordRequirements.minLength')}
                     </li>
                     <li className={/[A-Z]/.test(formData.password) ? 'text-success-600' : 'text-neutral-600'}>
-                      ✓ One uppercase letter
+                      ✓ {t('passwordRequirements.uppercase')}
                     </li>
                     <li className={/[a-z]/.test(formData.password) ? 'text-success-600' : 'text-neutral-600'}>
-                      ✓ One lowercase letter
+                      ✓ {t('passwordRequirements.lowercase')}
                     </li>
                     <li className={/\d/.test(formData.password) ? 'text-success-600' : 'text-neutral-600'}>
-                      ✓ One digit
+                      ✓ {t('passwordRequirements.digit')}
                     </li>
                     <li className={/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'text-success-600' : 'text-neutral-600'}>
-                      ✓ One special character
+                      ✓ {t('passwordRequirements.special')}
                     </li>
                   </ul>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs font-medium">Strength:</span>
+                    <span className="text-xs font-medium">{t('passwordRequirements.strengthLabel')}</span>
                     <div className="flex gap-1 flex-1">
                       <div className={buildClassName(
                         'h-1 flex-1 rounded',
@@ -274,14 +278,14 @@ export default function SignUpPage() {
             {/* Confirm Password Field */}
             <div>
               <label htmlFor="password_confirm" className="block text-sm font-medium text-neutral-700 mb-2">
-                Confirm Password
+                {t('fields.passwordConfirm')}
               </label>
               <Input
                 id="password_confirm"
                 type="password"
                 value={formData.password_confirm}
                 onChange={(e) => setFormData({ ...formData, password_confirm: e.target.value })}
-                placeholder="Re-enter your password"
+                placeholder={t('fields.passwordConfirmPlaceholder')}
                 disabled={isLoading}
                 className={buildClassName(
                   'w-full',
@@ -303,7 +307,7 @@ export default function SignUpPage() {
             disabled={isLoading}
             className="w-full"
           >
-            {isLoading ? 'Creating account...' : 'Create account'}
+            {isLoading ? t('submittingButton') : t('submitButton')}
           </Button>
 
           {/* Footer Links */}
@@ -312,7 +316,7 @@ export default function SignUpPage() {
               href="/"
               className="text-sm text-neutral-600 hover:text-neutral-900"
             >
-              Back to home
+              {tCommon('buttons.back')}
             </Link>
           </div>
         </form>

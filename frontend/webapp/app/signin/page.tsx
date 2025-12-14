@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { validateEmail } from '@/lib/utils/password-validator';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,9 @@ import { ApiError } from '@/lib/api/client';
 import { buildClassName } from '@/lib/design-system';
 
 export default function SignInPage() {
+  const t = useTranslations('auth.signIn');
+  const tValidation = useTranslations('validation');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { login, isAuthenticated } = useAuth();
 
@@ -39,7 +43,7 @@ export default function SignInPage() {
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = tValidation('password.required');
     }
 
     setErrors(newErrors);
@@ -62,12 +66,12 @@ export default function SignInPage() {
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.status === 401) {
-          setServerError('Invalid email or password');
+          setServerError(t('errors.invalidCredentials'));
         } else {
           setServerError(error.message);
         }
       } else {
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('errors.unexpected'));
       }
     } finally {
       setIsLoading(false);
@@ -87,12 +91,12 @@ export default function SignInPage() {
             </div>
           </Link>
           <h2 className="text-3xl font-bold text-neutral-900">
-            Sign in to your account
+            {t('title')}
           </h2>
           <p className="mt-2 text-sm text-neutral-600">
-            Or{' '}
+            {t('createAccountPrompt')}{' '}
             <Link href="/signup" className="font-medium text-primary-600 hover:text-primary-500">
-              create a new account
+              {t('createAccountLink')}
             </Link>
           </p>
         </div>
@@ -112,14 +116,14 @@ export default function SignInPage() {
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
-                Email address
+                {t('fields.email')}
               </label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="you@example.com"
+                placeholder={t('fields.emailPlaceholder')}
                 disabled={isLoading}
                 className={buildClassName(
                   'w-full',
@@ -135,14 +139,14 @@ export default function SignInPage() {
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
-                Password
+                {t('fields.password')}
               </label>
               <Input
                 id="password"
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="Enter your password"
+                placeholder={t('fields.passwordPlaceholder')}
                 disabled={isLoading}
                 className={buildClassName(
                   'w-full',
@@ -164,7 +168,7 @@ export default function SignInPage() {
             disabled={isLoading}
             className="w-full"
           >
-            {isLoading ? 'Signing in...' : 'Sign in'}
+            {isLoading ? t('submittingButton') : t('submitButton')}
           </Button>
 
           {/* Footer Links */}
@@ -173,7 +177,7 @@ export default function SignInPage() {
               href="/"
               className="text-sm text-neutral-600 hover:text-neutral-900"
             >
-              Back to home
+              {tCommon('buttons.back')}
             </Link>
           </div>
         </form>

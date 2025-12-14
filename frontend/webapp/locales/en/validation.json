@@ -9,6 +9,8 @@
     "formatExamples": "VIN Format Examples:",
     "formatNote": "VINs are exactly 17 characters and don't contain the letters I, O, or Q",
     "characterCount": "{count}/17",
+    "submitButton": "Generate Report",
+    "submittingButton": "Generating Report...",
     "submitHelp": "Click to start generating your comprehensive vehicle history report"
   },
   "email": {

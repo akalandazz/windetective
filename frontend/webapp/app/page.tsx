@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import MainLayout from '@/components/layout/main-layout';
 import VinInput from '@/components/vin-input';
 import LoadingOverlay from '@/components/loading-overlay';
@@ -10,8 +11,9 @@ import { buildClassName } from '@/lib/design-system';
 import { ProtectedRoute } from '@/lib/components/protected-route';
 
 export default function HomePage() {
+  const t = useTranslations('home');
   const [showDetailedReport, setShowDetailedReport] = useState(false);
-  
+
   const {
     report,
     state,
@@ -48,14 +50,13 @@ export default function HomePage() {
     <div className="text-center mb-12">
       <div className="mb-6">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-900 mb-4">
-          AI-Powered 
+          {t('hero.title.main')}{' '}
           <span className="text-primary-600 block sm:inline sm:ml-3">
-            Vehicle History Reports
+            {t('hero.title.highlight')}
           </span>
         </h1>
         <p className="text-lg md:text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
-          Get comprehensive insights about any vehicle using advanced AI analysis. 
-          Make confident automotive decisions with trusted data from multiple sources.
+          {t('hero.description')}
         </p>
       </div>
       
@@ -66,8 +67,8 @@ export default function HomePage() {
               <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className="font-semibold text-neutral-900 mb-2">Accurate Analysis</h3>
-          <p className="text-sm text-neutral-600">Advanced AI analyzes data from multiple trusted automotive databases</p>
+          <h3 className="font-semibold text-neutral-900 mb-2">{t('features.accurate.title')}</h3>
+          <p className="text-sm text-neutral-600">{t('features.accurate.description')}</p>
         </div>
         
         <div className="text-center p-6 bg-white rounded-lg border border-neutral-200">
@@ -76,8 +77,8 @@ export default function HomePage() {
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className="font-semibold text-neutral-900 mb-2">Comprehensive Reports</h3>
-          <p className="text-sm text-neutral-600">Detailed insights covering accidents, maintenance, ownership, and more</p>
+          <h3 className="font-semibold text-neutral-900 mb-2">{t('features.comprehensive.title')}</h3>
+          <p className="text-sm text-neutral-600">{t('features.comprehensive.description')}</p>
         </div>
         
         <div className="text-center p-6 bg-white rounded-lg border border-neutral-200">
@@ -86,8 +87,8 @@ export default function HomePage() {
               <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className="font-semibold text-neutral-900 mb-2">Instant Results</h3>
-          <p className="text-sm text-neutral-600">Get your complete vehicle history report in under 60 seconds</p>
+          <h3 className="font-semibold text-neutral-900 mb-2">{t('features.instant.title')}</h3>
+          <p className="text-sm text-neutral-600">{t('features.instant.description')}</p>
         </div>
       </div>
     </div>
@@ -101,14 +102,14 @@ export default function HomePage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-neutral-900">Vehicle Report Details</h2>
-              <p className="text-neutral-600">VIN: {report.vin}</p>
+              <h2 className="text-2xl font-bold text-neutral-900">{t('report.detailed.title')}</h2>
+              <p className="text-neutral-600">{t('report.detailed.vinLabel', { vin: report.vin })}</p>
             </div>
             <button
               onClick={handleStartOver}
               className="btn btn-secondary focus-ring"
             >
-              Generate New Report
+              {t('report.buttons.generateNew')}
             </button>
           </div>
           
@@ -120,16 +121,16 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-neutral-900 mb-2">
-                Detailed Report Sections Coming Soon
+                {t('report.detailed.comingSoon.title')}
               </h3>
               <p className="text-neutral-600 mb-4">
-                The individual report sections (Maintenance, Accidents, Ownership, etc.) are currently being developed.
+                {t('report.detailed.comingSoon.description')}
               </p>
               <button
                 onClick={() => setShowDetailedReport(false)}
                 className="btn btn-primary focus-ring"
               >
-                Back to Summary
+                {t('report.detailed.comingSoon.backButton')}
               </button>
             </div>
           </div>
@@ -146,13 +147,16 @@ export default function HomePage() {
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              Report Generated Successfully
+              {t('report.success.badge')}
             </div>
             <h2 className="text-3xl font-bold text-neutral-900 mb-2">
-              Vehicle Report for {report.vin}
+              {t('report.success.title', { vin: report.vin })}
             </h2>
             <p className="text-neutral-600">
-              Generated on {report.generatedAt.toLocaleDateString()} using {report.providersUsed.length} data sources
+              {t('report.success.subtitle', {
+                date: report.generatedAt.toLocaleDateString(),
+                count: report.providersUsed.length
+              })}
             </p>
           </div>
 
@@ -167,7 +171,7 @@ export default function HomePage() {
               onClick={handleStartOver}
               className="btn btn-outline focus-ring"
             >
-              Generate Another Report
+              {t('report.buttons.generateAnother')}
             </button>
           </div>
         </div>
@@ -185,10 +189,10 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto mb-12">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-neutral-900 mb-3">
-              Enter Vehicle VIN to Get Started
+              {t('vinInput.heading')}
             </h2>
             <p className="text-neutral-600">
-              Enter your 17-character Vehicle Identification Number to generate a comprehensive history report
+              {t('vinInput.description')}
             </p>
           </div>
 
@@ -196,25 +200,25 @@ export default function HomePage() {
             onSubmit={handleVinSubmit}
             isLoading={isLoading}
             error={error || undefined}
-            placeholder="Enter 17-character VIN"
+            placeholder={t('vinInput.placeholder')}
             className="mb-8"
           />
 
           {/* Trust Indicators */}
           <div className="bg-gradient-to-r from-neutral-50 to-neutral-100 rounded-lg p-6 text-center">
-            <h3 className="font-semibold text-neutral-900 mb-4">Trusted by thousands of automotive professionals</h3>
+            <h3 className="font-semibold text-neutral-900 mb-4">{t('trust.heading')}</h3>
             <div className="flex items-center justify-center gap-8 text-neutral-500">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-success-500 rounded-full"></div>
-                <span className="text-sm">Secure & Private</span>
+                <span className="text-sm">{t('trust.secure')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-success-500 rounded-full"></div>
-                <span className="text-sm">Official Data Sources</span>
+                <span className="text-sm">{t('trust.officialSources')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-success-500 rounded-full"></div>
-                <span className="text-sm">AI-Powered Analysis</span>
+                <span className="text-sm">{t('trust.aiPowered')}</span>
               </div>
             </div>
           </div>
@@ -223,14 +227,14 @@ export default function HomePage() {
         {/* Sample VIN for demo */}
         <div className="text-center">
           <p className="text-sm text-neutral-500 mb-2">
-            Don't have a VIN handy? Try our demo:
+            {t('demo.text')}
           </p>
           <button
             onClick={() => handleVinSubmit('1HGBH41JXMN109186')}
             className="text-primary-600 hover:text-primary-700 text-sm font-medium underline transition-colors duration-200"
             disabled={isLoading}
           >
-            Use Sample VIN (1HGBH41JXMN109186)
+            {t('demo.sampleButton', { vin: '1HGBH41JXMN109186' })}
           </button>
         </div>
       </>
