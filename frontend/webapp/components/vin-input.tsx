@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import type { VinInputProps } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
@@ -11,9 +12,10 @@ const VinInput: React.FC<VinInputProps> = ({
   onSubmit,
   isLoading = false,
   error,
-  placeholder = 'Enter 17-character VIN',
+  placeholder,
   className = '',
 }) => {
+  const t = useTranslations('validation.vin');
   const [vin, setVin] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isTouched, setIsTouched] = useState(false);
@@ -26,17 +28,17 @@ const VinInput: React.FC<VinInputProps> = ({
     }
 
     if (vin.length === 0) {
-      setValidationError('VIN is required');
+      setValidationError(t('required'));
     } else if (vin.length < 17) {
-      setValidationError(`VIN must be 17 characters (${vin.length}/17)`);
+      setValidationError(t('lengthShort', { current: vin.length }));
     } else if (vin.length > 17) {
-      setValidationError('VIN cannot exceed 17 characters');
+      setValidationError(t('lengthLong'));
     } else if (!VIN_REGEX.test(vin)) {
-      setValidationError('Invalid VIN format. Contains invalid characters (I, O, Q not allowed)');
+      setValidationError(t('invalidFormat'));
     } else {
       setValidationError(null);
     }
-  }, [vin, isTouched]);
+  }, [vin, isTouched, t]);
 
   const handleInputChange = (value: string) => {
     // Convert to uppercase and remove invalid characters
@@ -65,18 +67,18 @@ const VinInput: React.FC<VinInputProps> = ({
     <div className={cn('w-full max-w-md mx-auto', className)}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label 
-            htmlFor="vin-input" 
+          <label
+            htmlFor="vin-input"
             className="block text-sm font-medium text-neutral-700 mb-2"
           >
-            Vehicle Identification Number (VIN)
+            {t('label')}
           </label>
-          
+
           <Input
             id="vin-input"
             value={vin}
             onChange={(e) => handleInputChange(e.target.value)}
-            placeholder={placeholder}
+            placeholder={placeholder || t('label')}
             disabled={isLoading}
             maxLength={17}
             className="vin-input text-center text-lg font-mono tracking-wider"
@@ -101,7 +103,7 @@ const VinInput: React.FC<VinInputProps> = ({
           {/* Help text */}
           {!displayError && (
             <p id="vin-help" className="mt-2 text-sm text-neutral-600">
-              Enter the 17-character VIN from your vehicle registration or dashboard
+              {t('helpText')}
             </p>
           )}
           
@@ -137,19 +139,19 @@ const VinInput: React.FC<VinInputProps> = ({
           className="mt-6 w-full"
           aria-describedby="submit-button-help"
         >
-          {isLoading ? 'Generating Report...' : 'Generate Report'}
+          {isLoading ? t('submittingButton', { defaultValue: 'Generating Report...' }) : t('submitButton', { defaultValue: 'Generate Report' })}
         </Button>
-        
+
         {!isLoading && (
           <p id="submit-button-help" className="text-xs text-center text-neutral-600 mt-2">
-            Click to start generating your comprehensive vehicle history report
+            {t('submitHelp')}
           </p>
         )}
       </form>
       
       {/* VIN Format Examples */}
       <div className="mt-6 p-4 bg-neutral-50 rounded-lg">
-        <h4 className="text-sm font-medium text-neutral-900 mb-2">VIN Format Examples:</h4>
+        <h4 className="text-sm font-medium text-neutral-900 mb-2">{t('formatExamples')}</h4>
         <div className="space-y-1">
           <div className="text-sm text-neutral-600 font-mono">
             1HGBH41JXMN109186
@@ -159,7 +161,7 @@ const VinInput: React.FC<VinInputProps> = ({
           </div>
         </div>
         <p className="text-xs text-neutral-600 mt-2">
-          VINs are exactly 17 characters and don't contain the letters I, O, or Q
+          {t('formatNote')}
         </p>
       </div>
     </div>

@@ -34,9 +34,19 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
 
+    # Database settings
+    database_url: str = Field(default="sqlite:///./windetective.db", env="DATABASE_URL")
+
     # Celery settings
     celery_broker_url: str = Field(default="redis://localhost:6379/0", env="CELERY_BROKER_URL")
     celery_result_backend: str = Field(default="redis://localhost:6379/0", env="CELERY_RESULT_BACKEND")
+
+    # JWT
+    jwt_secret_key : str = Field(default="your_secret_key", env="JWT_SECRET_KEY")
+    access_token_expire_minutes : int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")
+
+    # Cookie settings
+    cookie_secure: bool = Field(default=False, env="COOKIE_SECURE")  # Set to True in production with HTTPS
 
     class Config:
         env_file = ".env"

@@ -1,0 +1,22 @@
+{
+  "navigation": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out"
+  },
+  "brand": {
+    "name": "CarHistory AI",
+    "tagline": "Comprehensive Vehicle Reports"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "back": "Back to home",
+    "pleaseWait": "Please wait..."
+  }
+}

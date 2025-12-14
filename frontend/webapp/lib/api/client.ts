@@ -5,6 +5,13 @@ import type {
   PollingOptions
 } from '@/lib/types/api';
 
+import type {
+  LoginRequest,
+  SignupRequest,
+  TokenResponse,
+  UserInfo
+} from '@/lib/types';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 class ApiError extends Error {
@@ -35,7 +42,7 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     // Merge headers properly
     const headers = new Headers(this.defaultHeaders);
     if (options.headers) {
@@ -44,10 +51,11 @@ class ApiClient {
         headers.set(key, value);
       });
     }
-    
+
     const config: RequestInit = {
       ...options,
       headers: headers,
+      credentials: options.credentials || 'include', // Always include cookies for auth
     };
 
     try {
@@ -116,14 +124,14 @@ class ApiClient {
   ): Promise<BackendReportResponse> {
     const { interval = 2000, timeout = 60000 } = options;
     const startTime = Date.now();
-   
+
     while (Date.now() - startTime < timeout) {
       const result = await this.getTaskResult(taskId);
-      
+
       if ((result.status === 'SUCCESS' || result.status === 'COMPLETED') && result.result) {
         return result.result;
       }
-      
+
       if (result.status === 'FAILURE' || result.status === 'REVOKED') {
         throw new ApiError(
           result.message || 'Task failed',
@@ -131,16 +139,39 @@ class ApiClient {
           'TASK_FAILED'
         );
       }
-      
+
       // Wait before polling again
       await new Promise(resolve => setTimeout(resolve, interval));
     }
-   
+
     throw new ApiError(
       'Task polling timed out',
       undefined,
       'POLLING_TIMEOUT'
     );
+  }
+
+  // Authentication endpoints
+  async login(credentials: LoginRequest): Promise<TokenResponse> {
+    return this.post<TokenResponse>('/api/v1/users/login', credentials);
+  }
+
+  async signup(data: SignupRequest): Promise<TokenResponse> {
+    return this.post<TokenResponse>('/api/v1/users/signup', data);
+  }
+
+  async refreshToken(): Promise<TokenResponse> {
+    return this.post<TokenResponse>('/api/v1/users/refresh', null);
+  }
+
+  async logout(): Promise<void> {
+    return this.post<void>('/api/v1/users/logout', null);
+  }
+
+  async getCurrentUser(accessToken: string): Promise<UserInfo> {
+    return this.get<UserInfo>('/api/v1/users/me', {
+      'Authorization': `Bearer ${accessToken}`,
+    });
   }
 }
 

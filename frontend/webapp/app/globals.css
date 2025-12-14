@@ -429,3 +429,49 @@ p {
     @apply bg-background text-foreground;
   }
 }
+
+/* Georgian Language Support */
+/* Apply Georgian font when Georgian locale is active */
+html[lang="ka"],
+html[lang="ka"] body {
+  font-family: 'Noto Sans Georgian', var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Adjust line-height for Georgian script readability */
+html[lang="ka"] {
+  line-height: 1.7;
+}
+
+html[lang="ka"] p {
+  line-height: 1.8;
+}
+
+/* Handle longer Georgian text in buttons */
+html[lang="ka"] button,
+html[lang="ka"] .btn {
+  white-space: normal;
+  text-align: center;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+/* Ensure proper spacing for Georgian text */
+html[lang="ka"] h1,
+html[lang="ka"] h2,
+html[lang="ka"] h3,
+html[lang="ka"] h4,
+html[lang="ka"] h5,
+html[lang="ka"] h6 {
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+/* Georgian-specific font weights (Georgian script is naturally heavier) */
+html[lang="ka"] {
+  font-weight: 400;
+}
+
+html[lang="ka"] strong,
+html[lang="ka"] b {
+  font-weight: 600;
+}

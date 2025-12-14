@@ -1,4 +1,16 @@
 services:
+  database:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - app-network
+    restart: unless-stopped
+
   redis:
     image: redis:alpine
     ports:
@@ -35,8 +47,10 @@ services:
       - AI_MOCK_RESPONSE=${AI_MOCK_RESPONSE}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
     depends_on:
       - redis
+      - database
     networks:
       - app-network
     restart: unless-stopped
