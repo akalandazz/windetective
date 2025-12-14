@@ -4,10 +4,15 @@ import uvicorn
 from routers.report_router import router as report_router
 from routers.user_router import router as user_router
 from settings import settings
+from database import engine
+from models import Base
 import logging
 
 logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger(__name__)
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.app_title, version=settings.app_version)
 

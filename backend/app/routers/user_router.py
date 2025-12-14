@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from datetime import timedelta
+from sqlalchemy.orm import Session
 
 from auth import (
     get_password_hash,
@@ -13,58 +14,59 @@ from auth import (
     LoginRequest,
 )
 from services.user_service import create_user, get_user_by_email
+from database import get_db
 
 router = APIRouter()
 
 @router.post("/signup", response_model=Token, tags=["user"])
-def signup(email: str, password: str, name: str, phone: str):
+def signup(email: str, password: str, name: str, phone: str, db: Session = Depends(get_db)):
     # Check if user already exists
-    existing_user = get_user_by_email(email)
+    existing_user = get_user_by_email(db, email)
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     # Hash the password
     hashed_password = get_password_hash(password)
-    
+
     # Create the user
-    user = create_user(email=email, password=hashed_password, name=name, phone=phone)
-    
+    user = create_user(db, email=email, password=hashed_password, name=name, phone=phone)
+
     # Generate JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": email}, expires_delta=access_token_expires
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token, tags=["user"])
-def login(login_request: LoginRequest):
+def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     # Get user by email
-    user = get_user_by_email(login_request.username)
+    user = get_user_by_email(db, login_request.username)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
+
     # Verify password
     if not verify_password(login_request.password, user.password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
-    
+
     # Generate JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me", tags=["user"])
-def get_current_user_info(current_user: str = Depends(get_current_user)):
-    user = get_user_by_email(current_user.email)
+def get_current_user_info(current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = get_user_by_email(db, current_user.email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"email": user.email, "name": user.name, "phone": user.phone}
 
 @router.post("/refresh", response_model=Token, tags=["user"])
-def refresh_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="token"))):
+def refresh_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="token")), db: Session = Depends(get_db)):
     """
     Stateless token refresh endpoint.
 
@@ -80,7 +82,7 @@ def refresh_token(token: str = Depends(OAuth2PasswordBearer(tokenUrl="token"))):
     token_data = decode_token_for_refresh(token)
 
     # Verify the user still exists
-    user = get_user_by_email(token_data.email)
+    user = get_user_by_email(db, token_data.email)
     if not user:
         raise HTTPException(
             status_code=404,
